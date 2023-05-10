@@ -10,4 +10,4 @@
 
 - Build: `gradle build`
 
-- Run Main: `gradle run`
+- Run AdministratorClient: `gradle run`
