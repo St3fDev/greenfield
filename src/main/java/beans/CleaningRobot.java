@@ -7,45 +7,31 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class CleaningRobot {
     private static final String BROKER_ADDRESS = "tcp://localhost:1883";
     private static final String ID = MqttClient.generateClientId();
     private static final int QOS = 2;
 
-    //TODO capire come definire la porta
-    private String topic;
-    private Cell position;
-
-    private void setPosition(Cell position) {
-        this.position = position;
-    }
-    public void setTopic(String topic) {
-        this.topic = topic;
-    }
-
-    public Cell getPosition() {
-        return position;
-    }
-    public String getId() {
-        return ID;
-    }
-
-
-    //TODO scrivere metodo che ritorna la porta
+    private List<CleaningRobotData> robotsInGreenfield = new ArrayList<>();
 
     public static void main(String[] args) {
         Client client = Client.create();
         String serverAddress = "http://localhost:1337";
         ClientResponse clientResponse = null;
 
-        String postPath = "/robots/" + ID;
+        String postPath = "/robots/addRobot";
         //TODO aggiungere parametri corretti per address e port
-        CleaningRobotInfo cleaningRobot = new CleaningRobotInfo(ID, "localhost", "1234");
+        CleaningRobotData cleaningRobot = new CleaningRobotData(ID, "localhost", "1234");
         clientResponse = postRequest(client, serverAddress + postPath, cleaningRobot);
         System.out.println(clientResponse.toString());
     }
 
-    public static ClientResponse postRequest(Client client, String url, CleaningRobotInfo cleaningRobot){
+    public static ClientResponse postRequest(Client client, String url, CleaningRobotData cleaningRobot){
         WebResource webResource = client.resource(url);
         String input = new Gson().toJson(cleaningRobot);
         System.out.println(input);

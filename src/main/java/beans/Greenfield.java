@@ -1,13 +1,10 @@
 package beans;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Greenfield {
 
-    private HashMap<CleaningRobotInfo,Cell> robots = new HashMap<CleaningRobotInfo, Cell>();
-
-    private HashMap<String, CleaningRobotInfo> robotsTest = new HashMap<String, CleaningRobotInfo>();
+    private HashMap<String, CleaningRobotData> robots = new HashMap<String, CleaningRobotData>();
     private int[] districts;
 
     private Greenfield() {
@@ -15,14 +12,14 @@ public class Greenfield {
     }
     private static Greenfield instance;
 
+    public List<CleaningRobotData> getRobots() {
+        return new ArrayList<>(robots.values());
+    }
+
     public static Greenfield getInstance() {
         if (instance == null)
             instance = new Greenfield();
         return instance;
-    }
-
-    private synchronized List<String> getRobotsIds() {
-        return robots.keySet().stream().map(CleaningRobotInfo::getId).collect(Collectors.toList());
     }
 
     private synchronized int MinNumberOfCleaningRobotPerDistrict() {
@@ -35,42 +32,35 @@ public class Greenfield {
         return minIndex;
     }
 
-    private Cell generateRandomPosition(int index) {
+    private Position generateRandomPosition(int index) {
         Random rand = new Random();
         switch (index) {
             case 0:
-                return new Cell(rand.nextInt(5), rand.nextInt(5));
+                districts[0] += 1;
+                return new Position(rand.nextInt(5), rand.nextInt(5));
             case 1:
-                return new Cell(rand.nextInt(5), rand.nextInt(5)+5);
+                districts[1] += 1;
+                return new Position(rand.nextInt(5), rand.nextInt(5)+5);
             case 2:
-                return new Cell(rand.nextInt(5) + 5, rand.nextInt(5));
+                districts[2] += 1;
+                return new Position(rand.nextInt(5) + 5, rand.nextInt(5));
             case 3:
-                return new Cell(rand.nextInt(5)+5, rand.nextInt(5)+5);
+                districts[3] += 1;
+                return new Position(rand.nextInt(5)+5, rand.nextInt(5)+5);
         }
         return null;
     }
 
-    /*public boolean addRobot(String id) {
-        if (getRobotsIds().contains(id)) {
+    public boolean addRobotTest(CleaningRobotData cleaningRobot) {
+        if (robots.containsKey(cleaningRobot.getId())) {
             return false;
         }
         int indexOfDisctrict = MinNumberOfCleaningRobotPerDistrict();
-        Cell cell = generateRandomPosition(indexOfDisctrict);
+        Position position = generateRandomPosition(indexOfDisctrict);
+        cleaningRobot.setPosition(position);
         synchronized (this.robots) {
-            robots.put(new CleaningRobot(id),cell);
-        //TODO aggiungere un robot alla mappa
-        }
-        return true;
-    }*/
+            robots.put(cleaningRobot.getId(), cleaningRobot);
 
-    public boolean addRobotTest(CleaningRobotInfo cleaningRobot) {
-        if (robotsTest.containsKey(cleaningRobot.getId())) {
-            return false;
-        }
-        int indexOfDisctrict = MinNumberOfCleaningRobotPerDistrict();
-        Cell cell = generateRandomPosition(indexOfDisctrict);
-        synchronized (this.robotsTest) {
-            robotsTest.put(cleaningRobot.getId(), cleaningRobot);
             //TODO aggiungere un robot alla mappa
         }
         return true;
