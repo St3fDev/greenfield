@@ -12,8 +12,8 @@ public class AdministratorServer {
     private static final int PORT = 1337;
     private static final String BROKER_ADDRESS = "tcp://localhost:1883";
     private static final String ID = MqttClient.generateClientId();
-    private static final String[] topics = {"greenfield/pollution/district1", "greenfield/pollution/district2", "greenfield/pollution/district3", "greenfield/pollution/district4"};
-    private static final int[] QOSs = {2, 2, 2, 2};
+    private static final String topic = "greenfield/pollution/district/*";
+    private static final int QOS = 2;
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServerFactory.create("http://"+HOST + ":" + PORT + "/");
@@ -21,7 +21,7 @@ public class AdministratorServer {
 
         System.out.println("Administrator server started!");
         System.out.println("Administrator server started on http://"+HOST + ":" + PORT);
-        System.in.read();
+        new Scanner(System.in).nextLine();
         System.out.println("Stopping Administrator server");
         server.stop(0);
         System.out.println("Administrator server stopped");

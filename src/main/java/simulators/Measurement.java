@@ -46,6 +46,9 @@ public class Measurement implements Comparable<Measurement> {
         this.type = type;
     }
 
+    // restituisce un valore negativo se "thisTimestamp" è minore di "otherTimestamp",
+    // un valore positivo se "thisTimestamp" è maggiore di "otherTimestamp"
+    // 0 se sono uguali.
     @Override
     public int compareTo(Measurement m) {
         Long thisTimestamp = timestamp;
