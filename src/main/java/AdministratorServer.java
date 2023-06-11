@@ -1,10 +1,8 @@
-import beans.CleaningRobot;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class AdministratorServer {
@@ -12,8 +10,8 @@ public class AdministratorServer {
     private static final int PORT = 1337;
     private static final String BROKER_ADDRESS = "tcp://localhost:1883";
     private static final String ID = MqttClient.generateClientId();
-    private static final String topic = "greenfield/pollution/district/*";
-    private static final int QOS = 2;
+    private static final String[] TOPIC = {"greenfield/pollution/district1", "greenfield/pollution/district2", "greenfield/pollution/district3", "greenfield/pollution/district4"};
+    private static final int[] QOSs = {2,2,2,2};
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServerFactory.create("http://"+HOST + ":" + PORT + "/");
@@ -21,18 +19,14 @@ public class AdministratorServer {
 
         System.out.println("Administrator server started!");
         System.out.println("Administrator server started on http://"+HOST + ":" + PORT);
-        new Scanner(System.in).nextLine();
-        System.out.println("Stopping Administrator server");
-        server.stop(0);
-        System.out.println("Administrator server stopped");
 
-        /*try(MqttClient client = new MqttClient(AdministratorServer.BROKER_ADDRESS, AdministratorServer.ID)) {
+        try(MqttClient client = new MqttClient(AdministratorServer.BROKER_ADDRESS, AdministratorServer.ID)) {
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
 
             System.out.printf("(%s) connection to the broker %s...\n", AdministratorServer.BROKER_ADDRESS, AdministratorServer.ID);
             client.connect(connOpts);
-            System.out.printf("(%s) connesso\n", AdministratorServer.ID);
+            System.out.printf("(%s) connected\n", AdministratorServer.ID);
 
             client.setCallback(new MqttCallback() {
                 @Override
@@ -47,22 +41,24 @@ public class AdministratorServer {
 
                 @Override
                 public void deliveryComplete(IMqttDeliveryToken token) {
-
+                    // not used
                 }
             });
 
             System.out.printf("(%s) subscribing to the topic...\n", AdministratorServer.ID);
-            client.subscribe(topics, AdministratorServer.QOSs);
+            client.subscribe(AdministratorServer.TOPIC, AdministratorServer.QOSs);
             System.out.printf("(%s) topic registration completed\n", AdministratorServer.ID);
 
             System.out.println("Press a button to stop...");
             Scanner scanner = new Scanner(System.in);
             scanner.nextLine();
-
+            System.out.println("Stopping Administrator server");
+            server.stop(0);
+            System.out.println("Administrator server stopped");
             client.disconnect();
         } catch (MqttException mqttException) {
             System.err.printf("An error has occurred: %s\n", mqttException);
-        }*/
+        }
     }
 
 }

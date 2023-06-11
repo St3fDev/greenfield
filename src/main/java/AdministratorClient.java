@@ -1,9 +1,7 @@
-import beans.CleaningRobot;
-import beans.CleaningRobotData;
+import Robot.CleaningRobotData;
 import beans.GreenfieldModel;
 import com.sun.jersey.api.client.*;
 
-import java.util.List;
 import java.util.Scanner;
 
 public class AdministratorClient {
@@ -48,8 +46,12 @@ public class AdministratorClient {
                 GreenfieldModel robots = clientResponse.getEntity(GreenfieldModel.class);
                 System.out.println("these are the ids of the cleaning robots currently in greenfield");
                 for (CleaningRobotData c: robots.getRobots()) {
-                    System.out.println("ID: " + c.getId());
+                    System.out.println("ID: " + c.getId() + " DISCRICT: " + (c.getDistrict()+1));
                 }
+            } else if (option.equals("2")){
+
+            } else {
+
             }
         } while(true);
     }

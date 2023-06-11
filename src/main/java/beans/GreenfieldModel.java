@@ -1,19 +1,19 @@
 package beans;
 
+import Robot.CleaningRobotData;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.*;
+import java.util.stream.Collectors;
+
 @XmlRootElement
 @XmlAccessorType (XmlAccessType.FIELD)
 public class GreenfieldModel {
 
-    //private final HashMap<String, CleaningRobotData> robots = new HashMap<String, CleaningRobotData>();
-
-
     private List<CleaningRobotData> robots;
-
+    private Map<String, List<Double>> robotMeasurements = new HashMap<>();
     private final int[] districts;
 
     private GreenfieldModel() {
@@ -22,20 +22,20 @@ public class GreenfieldModel {
     }
     private static GreenfieldModel instance;
 
-    public synchronized List<CleaningRobotData> getRobots() {
-        //return new ArrayList<>(robots.values());
-        return new ArrayList<>(robots);
+    public static synchronized GreenfieldModel getInstance() {
+        if (instance == null)
+            instance = new GreenfieldModel();
+        return instance;
+    }
+
+    private synchronized List<String> getIds() {
+        return robots.stream().map(CleaningRobotData::getId).collect(Collectors.toList());
     }
 
     public synchronized void setRobots(List<CleaningRobotData> robots) {
         this.robots = robots;
     }
 
-    public static synchronized GreenfieldModel getInstance() {
-        if (instance == null)
-            instance = new GreenfieldModel();
-        return instance;
-    }
 
     private int MinNumberOfCleaningRobotPerDistrict() {
         int minIndex = 0;
@@ -54,51 +54,55 @@ public class GreenfieldModel {
         switch (index) {
             case 0:
                 districts[0] += 1;
-                cleaningRobot.setDistrict(0);
+                cleaningRobot.setDistrict(1);
                 return new Position(rand.nextInt(5), rand.nextInt(5));
             case 1:
                 districts[1] += 1;
-                cleaningRobot.setDistrict(1);
+                cleaningRobot.setDistrict(2);
                 return new Position(rand.nextInt(5), rand.nextInt(5)+5);
             case 2:
                 districts[2] += 1;
-                cleaningRobot.setDistrict(2);
+                cleaningRobot.setDistrict(3);
                 return new Position(rand.nextInt(5) + 5, rand.nextInt(5));
             case 3:
                 districts[3] += 1;
-                cleaningRobot.setDistrict(3);
+                cleaningRobot.setDistrict(4);
                 return new Position(rand.nextInt(5)+5, rand.nextInt(5)+5);
         }
         return null;
     }
-
+    // GESTIONE ROBOTS:
     public boolean addRobot(CleaningRobotData cleaningRobot) {
-        for (CleaningRobotData robot: robots) {
-            if (robot.getId().equals(cleaningRobot.getId())) {
-                return false;
-            }
-        }
-        /*if (robots.containsKey(cleaningRobot.getId())) {
+        if (getIds().contains(cleaningRobot.getId())) {
             return false;
-        }*/
+        }
         int indexOfDistrict = MinNumberOfCleaningRobotPerDistrict();
         Position position = generateRandomPosition(indexOfDistrict, cleaningRobot);
         cleaningRobot.setPosition(position);
         synchronized (this.robots) {
-            //robots.add(cleaningRobot.getId(), cleaningRobot);
             robots.add(cleaningRobot);
         }
         return true;
     }
 
-    /*public void removeRobot(String id) {
-        CleaningRobotData robotToRemove = robots.get(id);
-        System.out.println(robotToRemove.getId());
-        districts[robotToRemove.getDistrict()] -= 1;
-        synchronized (this.robots) {
-            robots.remove(id);
+    public void removeRobot(String id) {
+        CleaningRobotData tempRobot = null;
+        for (CleaningRobotData robot : robots) {
+            if (robot.getId().equals(id)) {
+                tempRobot = robot;
+            }
         }
-    }*/
+        districts[tempRobot.getDistrict()-1] -= 1;
+        synchronized (this.robots) {
+            robots.removeIf((elem) -> elem.getId().equals(id));
+        }
+    }
+
+    // STATISTICS:
+    public synchronized List<CleaningRobotData> getRobots() {
+        return new ArrayList<>(robots);
+    }
+
 
 }
 

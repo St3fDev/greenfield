@@ -1,4 +1,6 @@
-package beans;
+package Robot;
+
+import beans.Position;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

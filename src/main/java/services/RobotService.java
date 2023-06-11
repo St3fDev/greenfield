@@ -1,6 +1,6 @@
 package services;
 
-import beans.CleaningRobotData;
+import Robot.CleaningRobotData;
 import beans.GreenfieldModel;
 
 import javax.ws.rs.*;
@@ -26,8 +26,7 @@ public class RobotService {
     @Path("removeRobot/{id}")
     @DELETE
     public Response removeCleaningRobot(@PathParam("id") String id) {
-        //TODO da implementare
-        //GreenfieldModel.getInstance().removeRobot(id);
+        GreenfieldModel.getInstance().removeRobot(id);
         return Response.ok().entity("The robot with id: " + id + " has been removed").build();
     }
 }

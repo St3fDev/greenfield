@@ -1,4 +1,4 @@
-package beans;
+package Robot;
 
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
@@ -12,6 +12,9 @@ import java.util.*;
 public class CleaningRobot {
     private static final String BROKER_ADDRESS = "tcp://localhost:1883";
     private static final String ID = MqttClient.generateClientId();
+
+    private static String address;
+    private static String port;
     private static final int QOS = 2;
 
     private List<CleaningRobotData> robotsInGreenfield = new ArrayList<>();
@@ -24,13 +27,24 @@ public class CleaningRobot {
 
         String postPath = "/robots/addRobot";
         //TODO aggiungere parametri corretti per address e port
-        CleaningRobotData cleaningRobot = new CleaningRobotData(ID, "localhost", "1234");
+        setServerDetails();
+        CleaningRobotData cleaningRobot = new CleaningRobotData(ID, address, port);
         clientResponse = postRequest(client, serverAddress + postPath, cleaningRobot);
         System.out.println(clientResponse.toString());
 
         removeRobot(client);
         //clientResponse = deleteRequest(client, serverAddress + removePath, ID);
         //System.out.println(clientResponse.toString());
+    }
+
+    private static void setServerDetails() {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Enter the server address: ");
+        System.out.print(">>");
+        address = in.next();
+        System.out.println("Enter the server port: ");
+        System.out.print(">>");
+        port = in.next();
     }
 
     private static ClientResponse postRequest(Client client, String url, CleaningRobotData cleaningRobot){
