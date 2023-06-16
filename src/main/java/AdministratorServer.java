@@ -3,6 +3,7 @@ import com.sun.net.httpserver.HttpServer;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Scanner;
 
 public class AdministratorServer {
@@ -36,7 +37,9 @@ public class AdministratorServer {
 
                 @Override
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
-
+                    String time = new Timestamp(System.currentTimeMillis()).toString();
+                    String receivedMessage = new String(message.getPayload());
+                    System.out.println("STAMPO IL VALORE DI PROVA:" + receivedMessage);
                 }
 
                 @Override

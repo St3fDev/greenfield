@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 public class GreenfieldModel {
 
     private List<CleaningRobotData> robots;
-    private Map<String, List<Double>> robotMeasurements = new HashMap<>();
     private final int[] districts;
 
     private GreenfieldModel() {
@@ -39,13 +38,13 @@ public class GreenfieldModel {
 
     private int MinNumberOfCleaningRobotPerDistrict() {
         int minIndex = 0;
-        // TODO aggiungere sincronizzazione
-        for (int i = 1; i < districts.length; i++) {
-            if (districts[i] < districts[minIndex]) {
-                minIndex = i;
+        synchronized (this.districts) {
+            for (int i = 1; i < districts.length; i++) {
+                if (districts[i] < districts[minIndex]) {
+                    minIndex = i;
+                }
             }
         }
-
         return minIndex;
     }
 
@@ -71,7 +70,7 @@ public class GreenfieldModel {
         }
         return null;
     }
-    // GESTIONE ROBOTS:
+    // HANDLE ROBOTS:
     public boolean addRobot(CleaningRobotData cleaningRobot) {
         if (getIds().contains(cleaningRobot.getId())) {
             return false;
@@ -101,9 +100,22 @@ public class GreenfieldModel {
     // STATISTICS:
     public synchronized List<CleaningRobotData> getRobots() {
         return new ArrayList<>(robots);
+
     }
+
+    /*public List<Double> avgLastNAirPollutionLevel(String id, int n) {
+        List<Double> measurements = robotMeasurements.get(id);
+        if (measurements != null && measurements.size() >= n) {
+            List<Double> lastNMeasurements = measurements.subList(measurements.size() - n, measurements.size()); // Prendi gli ultimi n elementi dalla lista
+            double average = calculateAverage(lastNMeasurements); // Calcola la media delle ultime n medie
+
+            // Utilizza la media come desiderato
+            System.out.println("Media degli ultimi " + n + " livelli di inquinamento del robot " + robotId + ": " + average);
+        } else {
+            // Non ci sono sufficienti medie disponibili per calcolare la media degli ultimi n livelli
+            System.out.println("Non ci sono sufficienti misurazioni disponibili per il robot " + robotId);
+        }
+    }*/
 
 
 }
-
-// TODO risolvere perchè non va la delete
