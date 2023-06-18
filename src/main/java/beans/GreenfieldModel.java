@@ -4,7 +4,9 @@ import Robot.CleaningRobotData;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -13,11 +15,13 @@ import java.util.stream.Collectors;
 public class GreenfieldModel {
 
     private List<CleaningRobotData> robots;
+    private Map<String,List<Statistic>> robotStatistics;
     private final int[] districts;
 
     private GreenfieldModel() {
         robots = new ArrayList<>();
         districts = new int[4];
+        robotStatistics = new HashMap<>();
     }
     private static GreenfieldModel instance;
 
@@ -100,22 +104,39 @@ public class GreenfieldModel {
     // STATISTICS:
     public synchronized List<CleaningRobotData> getRobots() {
         return new ArrayList<>(robots);
-
     }
 
-    /*public List<Double> avgLastNAirPollutionLevel(String id, int n) {
-        List<Double> measurements = robotMeasurements.get(id);
-        if (measurements != null && measurements.size() >= n) {
-            List<Double> lastNMeasurements = measurements.subList(measurements.size() - n, measurements.size()); // Prendi gli ultimi n elementi dalla lista
-            double average = calculateAverage(lastNMeasurements); // Calcola la media delle ultime n medie
+    public synchronized Map<String, List<Statistic>> getRobotStatistics() {
+        return robotStatistics;
+    }
 
-            // Utilizza la media come desiderato
-            System.out.println("Media degli ultimi " + n + " livelli di inquinamento del robot " + robotId + ": " + average);
-        } else {
-            // Non ci sono sufficienti medie disponibili per calcolare la media degli ultimi n livelli
-            System.out.println("Non ci sono sufficienti misurazioni disponibili per il robot " + robotId);
-        }
-    }*/
+    public synchronized void setRobotStatistics(Map<String, List<Statistic>> robotStatistics) {
+        this.robotStatistics = robotStatistics;
+    }
 
+    public Double avgLastNAirPollutionLevel(String id, int n) {
+        List<Statistic> stats = new ArrayList<>();
+        stats.add(new Statistic(2.0,1000L));
+        stats.add(new Statistic(3.0, 1222L));
+        stats.add(new Statistic(7.0, 3333L));
+
+        robotStatistics.put("id1", stats);
+        List<Statistic> statistics = robotStatistics.get(id);
+        List<Double> averages = statistics.stream()
+                .map(Statistic::getAverage)
+                .collect(Collectors.toList());
+        List<Double> lastN = averages.subList(Math.max(averages.size() - n, 0), averages.size());
+        return lastN.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+    }
+
+    public double averageAirPollutionLevelInRange(long t1, long t2) {
+        List<Double> averages = robotStatistics.values().stream()
+                .flatMap(List::stream)
+                .filter(statistic -> statistic.getTimestamp() >= t1 && statistic.getTimestamp() <= t2)
+                .map(Statistic::getAverage)
+                .collect(Collectors.toList());
+
+        return averages.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+    }
 
 }

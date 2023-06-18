@@ -26,25 +26,18 @@ public class BufferImpl implements Buffer {
     }
     @Override
     public void addMeasurement(Measurement m) {
-        synchronized (this.measurements) {
-            measurements.add(m);
-        }
+        measurements.add(m);
         if (measurements.size() >= BUFFER_SIZE) {
-            List<Measurement> measurementsToProcess = new ArrayList<>(measurements);
-
-            measurements.subList(0, (int) (BUFFER_SIZE / OVERLAP_FACTOR)).clear();
-            // Calcola la media delle misurazioni nel buffer
-            double media = calculateAverage(measurementsToProcess);
-            // Invia la media al server amministratore
-            //sendAverageToServer(media);
+            readAllAndClean();
         }
     }
 
     @Override
     public List<Measurement> readAllAndClean() {
-        List<Measurement> measurementsToReturn = new ArrayList<>(measurements);
-        measurements.clear();
-        return measurementsToReturn;
+        List<Measurement> measurementsToProcess = new ArrayList<>(measurements);
+        measurements.subList(0, (int) (BUFFER_SIZE * OVERLAP_FACTOR)).clear();
+        double avg = calculateAverage(measurementsToProcess);
+        return null;
     }
 
     private double calculateAverage(List<Measurement> measurements) {
