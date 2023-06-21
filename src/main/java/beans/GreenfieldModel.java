@@ -121,7 +121,10 @@ public class GreenfieldModel {
         stats.add(new Statistic(7.0, 3333L));
 
         robotStatistics.put("id1", stats);
-        List<Statistic> statistics = robotStatistics.get(id);
+        List<Statistic> statistics;
+        synchronized (this.robotStatistics) {
+            statistics = new ArrayList<>(robotStatistics.get(id));
+        }
         List<Double> averages = statistics.stream()
                 .map(Statistic::getAverage)
                 .collect(Collectors.toList());
@@ -130,13 +133,16 @@ public class GreenfieldModel {
     }
 
     public double averageAirPollutionLevelInRange(long t1, long t2) {
-        List<Double> averages = robotStatistics.values().stream()
+
+        Map<String,List<Statistic>> averages;
+        synchronized (this.robotStatistics) {
+            averages = new HashMap<>(robotStatistics);
+        }
+        return averages.values().stream()
                 .flatMap(List::stream)
                 .filter(statistic -> statistic.getTimestamp() >= t1 && statistic.getTimestamp() <= t2)
                 .map(Statistic::getAverage)
-                .collect(Collectors.toList());
-
-        return averages.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+                .collect(Collectors.toList()).stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
 }

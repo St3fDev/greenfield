@@ -1,5 +1,7 @@
 package Robot;
 
+import GRPC.RobotGRPCServer;
+import beans.GreenfieldDetails;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.*;
 import org.eclipse.paho.client.mqttv3.*;
@@ -11,24 +13,48 @@ public class CleaningRobot {
     private static final String ID = MqttClient.generateClientId();
     private static final int QOS = 2;
     private static final int SLEEP_TIME = 15 * 1_000;
-    private static String topic = "greenfield/pollution/district1";
-    private static String server_address;
-    private static String port;
-    private static List<CleaningRobotData> robotsInGreenfield = new ArrayList<>();
+    private static String topic;
+    private static String robotAddress;
+    private static int robotPort;
 
     public static void main(String[] args) throws InterruptedException {
         Client client = Client.create();
         String serverAddress = "http://localhost:1337";
         ClientResponse clientResponse = null;
-
-
         String postPath = "/robots/addRobot";
-        //TODO aggiungere parametri corretti per address e port
         setRobotsDetails();
-        CleaningRobotData cleaningRobot = new CleaningRobotData(ID, server_address, port);
+        CleaningRobotData cleaningRobot = new CleaningRobotData(ID, robotAddress, robotPort);
         clientResponse = postRequest(client, serverAddress + postPath, cleaningRobot);
         System.out.println(clientResponse.toString());
+        GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
+        cleaningRobot.setPosition(details.getPosition());
+
+        if (details.getRobots() != null)
+            cleaningRobot.setRobots(details.getRobots());
+
+        cleaningRobot.setDistrict(details.getDistrict());
+        topic = "greenfield/pollution/district" + cleaningRobot.getDistrict();
         removeRobot(client, serverAddress);
+        RobotGRPCServer serverGRPC = new RobotGRPCServer(cleaningRobot);
+        serverGRPC.start();
+
+        if (cleaningRobot.getRobots().size() >= 1) {
+            List<RobotPresentationThread> presentationThreads = new ArrayList<>();
+            for (CleaningRobotData robotToPresent: cleaningRobot.getRobots()) {
+                RobotPresentationThread presentation = new RobotPresentationThread(cleaningRobot, robotToPresent);
+                presentationThreads.add(presentation);
+                presentation.start();
+            }
+
+            for (RobotPresentationThread thread : presentationThreads) {
+                try {
+                    thread.join();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
         while (true) {
             // Si genera la temperatura (un numero da 18 a 22).
             Random rand = new Random();
@@ -87,12 +113,12 @@ public class CleaningRobot {
 
     private static void setRobotsDetails() {
         Scanner in = new Scanner(System.in);
-        System.out.println("Enter the server address: ");
-        System.out.print(">>");
-        server_address = in.next();
-        System.out.println("Enter the server port: ");
-        System.out.print(">>");
-        port = in.next();
+        System.out.println("Type the address of the robot: ");
+        System.out.print("> ");
+        robotAddress = in.next();
+        System.out.println("type the port of the robot: ");
+        System.out.print(">  ");
+        robotPort = Integer.parseInt(in.next());
     }
 
     private static ClientResponse postRequest(Client client, String url, CleaningRobotData cleaningRobot){

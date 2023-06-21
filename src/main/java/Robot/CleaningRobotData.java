@@ -3,6 +3,8 @@ package Robot;
 import beans.Position;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.List;
 
 @XmlRootElement
 public class CleaningRobotData {
@@ -10,9 +12,10 @@ public class CleaningRobotData {
     public CleaningRobotData() {}
     private String id;
     private String address;
-    private String port;
+    private int port;
     private Position position;
     private int district;
+    private List<CleaningRobotData> robots;
 
     public String getId() {
         return id;
@@ -29,11 +32,11 @@ public class CleaningRobotData {
     public void setAddress(String address) {
         this.address = address;
     }
-    public String getPort() {
+    public int getPort() {
         return port;
     }
 
-    public void setPort(String port) {
+    public void setPort(int port) {
         this.port = port;
     }
 
@@ -52,9 +55,24 @@ public class CleaningRobotData {
         this.position = position;
     }
 
-    public CleaningRobotData(String id, String address, String port) {
+    public CleaningRobotData(String id, String address, int port) {
         this.id = id;
         this.address = address;
         this.port = port;
+        this.robots = new ArrayList<>();
+    }
+
+    public List<CleaningRobotData> getRobots() {
+        return robots;
+    }
+
+    public void setRobots(List<CleaningRobotData> robots) {
+        this.robots = robots;
+    }
+
+    public void addRobot(CleaningRobotData robot) {
+        synchronized (this.robots) {
+            this.robots.add(robot);
+        }
     }
 }

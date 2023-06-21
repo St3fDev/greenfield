@@ -1,6 +1,7 @@
 package services;
 
 import Robot.CleaningRobotData;
+import beans.GreenfieldDetails;
 import beans.GreenfieldModel;
 
 import javax.ws.rs.*;
@@ -14,11 +15,13 @@ public class RobotService {
     @Path("addRobot")
     @POST
     @Consumes({"application/json", "application/xml"})
+    @Produces({"application/json", "application/xml"})
     public Response addCleaningRobot(CleaningRobotData cleaningRobot) {
         System.out.println("ID: " + cleaningRobot.getId() + " ADDRESS: " + cleaningRobot.getAddress() + " PORT: " + cleaningRobot.getPort());
         List<CleaningRobotData> robots = GreenfieldModel.getInstance().getRobots();
         if (GreenfieldModel.getInstance().addRobot(cleaningRobot)) {
-            return Response.ok(robots).entity("this robot is correctly inserted in greenfield").build();
+            GreenfieldDetails details = new GreenfieldDetails(cleaningRobot.getPosition(), robots, cleaningRobot.getDistrict());
+            return Response.ok(details).build();
         }
         return Response.status(Status.CONFLICT).entity("this robot already exists").build();
     }

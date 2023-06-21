@@ -42,6 +42,15 @@ public class AdministratorClient {
         }
     }
 
+    /*private static ClientResponse getAverageAirPollutionLevelsFromTimestamp(Client client, String serverAddress, Long t1, Long t2) {
+        try {
+
+        } catch (ClientHandlerException e) {
+            System.out.println("Server not available");
+            return null;
+        }
+    }*/
+
     public static void main(String[] args) {
         Client client = Client.create();
         String serverAddress = "http://localhost:1337";
