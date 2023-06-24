@@ -34,7 +34,7 @@ public class RobotPresentationThread extends Thread{
         stub.presentation(request, new StreamObserver<RobotServiceOuterClass.RobotResponse>() {
             @Override
             public void onNext(RobotServiceOuterClass.RobotResponse robotResponse) {
-                System.out.println("I'm in position: " + robotResponse.getPosition() + " " + robotResponse.getStatus());
+                System.out.println("I'm robot: " + robotResponse.getId() +" -> " + robotResponse.getStatus());
             }
 
             @Override

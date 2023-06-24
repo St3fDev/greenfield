@@ -1,19 +1,18 @@
 package it.robot.grpc;
 
+message Empty{}
+
 message RobotPresentation {
 
   required string id = 1;
-
   required string address = 2;
-
   required int32 port = 3;
-
   required Position position = 4;
 }
 
 message RobotResponse {
 
-  required Position position = 1;
+  required string id = 1;
   required Status status = 2;
 }
 
@@ -27,8 +26,13 @@ message Position {
   required int32 y = 2;
 }
 
+message RobotExitNotification {
+  required string id = 1;
+}
+
 service RobotService{
   rpc presentation(RobotPresentation) returns (RobotResponse);
+  rpc notifyExit(RobotExitNotification) returns (Empty);
 }
 
 

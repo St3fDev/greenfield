@@ -75,4 +75,10 @@ public class CleaningRobotData {
             this.robots.add(robot);
         }
     }
+
+    public void removeRobot(String robotId) {
+        synchronized (this.robots) {
+            robots.removeIf(robot -> robot.getId().equals(robotId));
+        }
+    }
 }
