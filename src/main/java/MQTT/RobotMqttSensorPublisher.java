@@ -2,8 +2,12 @@ package MQTT;
 
 import Robot.CleaningRobot;
 import Robot.CleaningRobotData;
+import beans.PollutionData;
+import beans.Statistic;
+import com.google.gson.Gson;
 import org.eclipse.paho.client.mqttv3.*;
 
+import java.util.List;
 import java.util.Random;
 
 public class RobotMqttSensorPublisher extends Thread{
@@ -23,19 +27,18 @@ public class RobotMqttSensorPublisher extends Thread{
     @Override
     public void run() {
         while (true) {
-            // Si genera la temperatura (un numero da 18 a 22).
-            Random rand = new Random();
-            // Obtain a number between [0 - 49].
-            String payload = String.valueOf(rand.nextInt(50));
-            // Si iniva il messaggio.
+            PollutionData data = new PollutionData(robot.getId(), robot.getAverages(), System.currentTimeMillis());
+
+            String payload = new Gson().toJson(data);
+
             try (MqttClient clientMqtt = new MqttClient(BROKER, ID)) {
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setCleanSession(true);
 
                 // Connessione del client.
-                System.out.printf("(%s) connessione al broker %s...\n", ID, BROKER);
+                //System.out.printf("(%s)  connection to the broker %s...\n", ID, BROKER);
                 clientMqtt.connect(connOpts);
-                System.out.printf("(%s) connesso\n", ID);
+                //System.out.printf("(%s) connected\n", ID);
 
                 // Si definisce il callback.
                 clientMqtt.setCallback(new MqttCallback() {
@@ -44,31 +47,31 @@ public class RobotMqttSensorPublisher extends Thread{
                     }
 
                     public void connectionLost(Throwable cause) {
-                        System.out.printf("(%s) connessione persa. Causa: %s\n", ID, cause.getMessage());
+                        System.out.printf("(%s) Connection lost. Caused by: %s\n", ID, cause.getMessage());
                     }
 
                     public void deliveryComplete(IMqttDeliveryToken token) {
                         if (token.isComplete()) {
-                            System.out.printf("(%s) messaggio consegnato con successo\n", ID);
+                            System.out.printf("(%s) message successfully delivered\n", ID);
                         }
                     }
                 });
 
                 // Si genera il messaggio.
                 MqttMessage message = new MqttMessage(payload.getBytes());
-
+                robot.clearLastAvg();
                 // Si definisce il QoS.
                 message.setQos(QOS);
-                System.out.printf("(%s) pubblicazione del nuovo messaggio: %s...\n", ID, payload);
+                System.out.printf("(%s) publication of the new message: %s...\n", ID, payload);
                 // Si pubblica il messaggio.
                 clientMqtt.publish(topic, message);
-                System.out.printf("(%s) messaggio pubblicato\n", ID);
+                System.out.printf("(%s) published message\n", ID);
 
                 // Si effettua la disconnessione.
                 if (clientMqtt.isConnected()) clientMqtt.disconnect();
-                System.out.printf("Sensore %s disconnesso\n", ID);
+                System.out.printf("Sensor %s disconnected\n", ID);
             } catch (MqttException mqttException) {
-                System.err.printf("Si è verificato un errore: %s\n", mqttException);
+                System.err.printf("An error occurred: %s\n", mqttException);
             }
 
             // Si aspettano cinque secondi e si invia nuovamente un messaggio.

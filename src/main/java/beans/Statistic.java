@@ -8,7 +8,10 @@ public class Statistic {
     private Long timestamp;
     private double average;
 
-    public Statistic() {}
+    public Statistic() {
+        timestamp = 0L;
+        average = 0.0;
+    }
 
     public Statistic(double average, Long timestamp) {
         this.timestamp = timestamp;

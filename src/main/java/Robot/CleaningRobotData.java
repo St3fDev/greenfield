@@ -1,6 +1,7 @@
 package Robot;
 
 import beans.Position;
+import beans.Statistic;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.ArrayList;
@@ -14,9 +15,24 @@ public class CleaningRobotData {
     private String address;
     private int port;
     private Position position;
-    private int district;
-    private List<CleaningRobotData> robots;
+    private  int district;
+    private transient List<CleaningRobotData> robots;
+    private transient boolean isInMaintenance;
+    private transient List<Statistic> averages;
 
+
+    public List<Statistic> getAverages() {
+        return averages;
+    }
+
+    public void clearLastAvg() {
+        synchronized (this.averages) {
+            averages.clear();
+        }
+    }
+    public void setAverages(List<Statistic> averages) {
+        this.averages = averages;
+    }
     public String getId() {
         return id;
     }
@@ -55,11 +71,21 @@ public class CleaningRobotData {
         this.position = position;
     }
 
+    public boolean isInMaintenance() {
+        return isInMaintenance;
+    }
+
+    public void setInMaintenance(boolean inMaintenance) {
+        isInMaintenance = inMaintenance;
+    }
+
     public CleaningRobotData(String id, String address, int port) {
         this.id = id;
         this.address = address;
         this.port = port;
         this.robots = new ArrayList<>();
+        this.isInMaintenance = false;
+        this.averages = new ArrayList<>();
     }
 
     public List<CleaningRobotData> getRobots() {
@@ -79,6 +105,13 @@ public class CleaningRobotData {
     public void removeRobot(String robotId) {
         synchronized (this.robots) {
             robots.removeIf(robot -> robot.getId().equals(robotId));
+        }
+    }
+
+    //TODO deve essere sincronizzato?
+    public void addStatistic(Statistic stat) {
+        synchronized (this.averages) {
+            this.averages.add(stat);
         }
     }
 }

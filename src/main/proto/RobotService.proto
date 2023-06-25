@@ -30,9 +30,19 @@ message RobotExitNotification {
   required string id = 1;
 }
 
+message MechanicAccessRequest{
+  required string id = 1;
+  required int64 timestamp = 2;
+}
+
+message MechanicAccessResponse{
+  required bool granted = 1;
+}
+
 service RobotService{
   rpc presentation(RobotPresentation) returns (RobotResponse);
   rpc notifyExit(RobotExitNotification) returns (Empty);
+  rpc accessToMechanic(MechanicAccessRequest) returns (MechanicAccessResponse);
 }
 
 

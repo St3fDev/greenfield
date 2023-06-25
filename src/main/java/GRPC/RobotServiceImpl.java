@@ -36,7 +36,7 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
         robot.removeRobot(idRobotToRemove);
         responseObserver.onNext(RobotServiceOuterClass.Empty.newBuilder().build());
         responseObserver.onCompleted();
-        System.out.println("Removing robot: " + request.getId() + "to my topology");
+        System.out.println("Removing robot: " + request.getId() + " to my topology...");
     }
 
 

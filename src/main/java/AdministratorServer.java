@@ -1,9 +1,14 @@
+import beans.GreenfieldModel;
+import beans.PollutionData;
+import beans.Statistic;
+import com.google.gson.Gson;
 import com.sun.jersey.api.container.httpserver.HttpServerFactory;
 import com.sun.net.httpserver.HttpServer;
 import org.eclipse.paho.client.mqttv3.*;
 
 import java.io.IOException;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Scanner;
 
 public class AdministratorServer {
@@ -39,7 +44,9 @@ public class AdministratorServer {
                 public void messageArrived(String topic, MqttMessage message) throws Exception {
                     String time = new Timestamp(System.currentTimeMillis()).toString();
                     String receivedMessage = new String(message.getPayload());
-                    System.out.println("STAMPO IL VALORE DI PROVA:" + receivedMessage);
+                    PollutionData averages = new Gson().fromJson(receivedMessage, PollutionData.class);
+                    GreenfieldModel.getInstance().addRobotStatistic(averages);
+                    System.out.println("VALUE RECEIVED");
                 }
 
                 @Override

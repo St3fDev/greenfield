@@ -2,10 +2,12 @@ package Robot;
 
 import GRPC.RobotGRPCServer;
 import MQTT.RobotMqttSensorPublisher;
+import beans.BufferImpl;
 import beans.GreenfieldDetails;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.*;
 import org.eclipse.paho.client.mqttv3.*;
+import simulators.PM10Simulator;
 
 import java.awt.*;
 import java.util.*;
@@ -14,10 +16,8 @@ import java.util.List;
 public class CleaningRobot {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
     private static final String ID = "id-" + (int) (1 + Math.random() * 100);
-    private static final int QOS = 2;
-    private static final int SLEEP_TIME = 15 * 1_000;
-    private static String topic;
     private static String robotAddress;
+    private static final double MALFUNCTION_PROBABILITY = 0.1;
     private static int robotPort;
 
     public static void main(String[] args) throws InterruptedException {
@@ -28,6 +28,7 @@ public class CleaningRobot {
         CleaningRobotData cleaningRobot = new CleaningRobotData(ID, robotAddress, robotPort);
         clientResponse = postRequest(client, cleaningRobot);
         System.out.println(clientResponse.toString());
+
         GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
 
         cleaningRobot.setPosition(details.getPosition());
@@ -60,8 +61,13 @@ public class CleaningRobot {
 
         RobotMqttSensorPublisher sensorPublisher = new RobotMqttSensorPublisher(cleaningRobot);
         sensorPublisher.start();
-        //clientResponse = deleteRequest(client, serverAddress + removePath, ID);
-        //System.out.println(clientResponse.toString());
+
+        MalfunctionThread robotProblems = new MalfunctionThread(cleaningRobot);
+        robotProblems.start();
+
+        BufferImpl buffer = new BufferImpl(cleaningRobot);
+        PM10Simulator simulator = new PM10Simulator(buffer);
+        simulator.start();
     }
 
     private static void setRobotsDetails() {
@@ -78,6 +84,7 @@ public class CleaningRobot {
         String postPath = SERVER_ADDRESS + "/robots/addRobot";
         WebResource webResource = client.resource(postPath);
         String input = new Gson().toJson(cleaningRobot);
+        System.out.println(input);
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {

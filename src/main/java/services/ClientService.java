@@ -40,7 +40,7 @@ public class ClientService {
     public Response getAveragePollutionLevel(@PathParam("t1") String t1, @PathParam("t2") String t2) {
         double average = GreenfieldModel.getInstance().averageAirPollutionLevelInRange(Long.parseLong(t1), Long.parseLong(t2));
         if (average != 0.0) {
-            return Response.ok(average).entity("Average sent successfully").build();
+            return Response.ok(average).build();
         }
         else {
             return Response.status(Response.Status.NOT_FOUND).entity("No statistics were made, come back later").build();

@@ -145,4 +145,13 @@ public class GreenfieldModel {
                 .collect(Collectors.toList()).stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
+    public void addRobotStatistic(PollutionData average) {
+        String robotId = average.getRobotId();
+        List<Statistic> existingAverages = robotStatistics.getOrDefault(robotId, new ArrayList<>());
+        List<Statistic> newAverages = average.getPollutionAverages();
+
+        existingAverages.addAll(newAverages);
+        robotStatistics.put(robotId, existingAverages);
+    }
+
 }

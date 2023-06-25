@@ -1,5 +1,6 @@
 package beans;
 
+import Robot.CleaningRobotData;
 import simulators.Buffer;
 import simulators.Measurement;
 
@@ -12,9 +13,12 @@ public class BufferImpl implements Buffer {
     private static final double OVERLAP_FACTOR = 0.5;
 
     private List<Measurement> measurements;
+    private final CleaningRobotData robot;
+    public BufferImpl(CleaningRobotData robot) {
 
-    public BufferImpl() {
         this.measurements = new ArrayList<>();
+        this.robot = robot;
+
     }
 
     public List<Measurement> getMeasurements() {
@@ -27,7 +31,7 @@ public class BufferImpl implements Buffer {
     @Override
     public void addMeasurement(Measurement m) {
         measurements.add(m);
-        if (measurements.size() >= BUFFER_SIZE) {
+        if (measurements.size() == BUFFER_SIZE) {
             readAllAndClean();
         }
     }
@@ -36,16 +40,17 @@ public class BufferImpl implements Buffer {
     public List<Measurement> readAllAndClean() {
         List<Measurement> measurementsToProcess = new ArrayList<>(measurements);
         measurements.subList(0, (int) (BUFFER_SIZE * OVERLAP_FACTOR)).clear();
-        double avg = calculateAverage(measurementsToProcess);
+        robot.addStatistic(calculateAverage(measurementsToProcess));
         return null;
     }
 
-    private double calculateAverage(List<Measurement> measurements) {
+    private Statistic calculateAverage(List<Measurement> measurements) {
         double sum = 0.0;
         for (Measurement m : measurements) {
             sum += m.getValue();
         }
-        return sum / measurements.size();
+        return new Statistic(sum/measurements.size(), System.currentTimeMillis());
     }
 
 }
+// TODO aggiungere sincronizzazione?
