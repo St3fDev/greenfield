@@ -1,6 +1,6 @@
 package beans;
 
-import Robot.CleaningRobotData;
+import Robot.CleaningRobotDetails;
 import simulators.Buffer;
 import simulators.Measurement;
 
@@ -13,11 +13,9 @@ public class BufferImpl implements Buffer {
     private static final double OVERLAP_FACTOR = 0.5;
 
     private List<Measurement> measurements;
-    private final CleaningRobotData robot;
-    public BufferImpl(CleaningRobotData robot) {
+    public BufferImpl() {
 
         this.measurements = new ArrayList<>();
-        this.robot = robot;
 
     }
 
@@ -40,7 +38,7 @@ public class BufferImpl implements Buffer {
     public List<Measurement> readAllAndClean() {
         List<Measurement> measurementsToProcess = new ArrayList<>(measurements);
         measurements.subList(0, (int) (BUFFER_SIZE * OVERLAP_FACTOR)).clear();
-        robot.addStatistic(calculateAverage(measurementsToProcess));
+        CleaningRobotDetails.getInstance().addStatistic(calculateAverage(measurementsToProcess));
         return null;
     }
 

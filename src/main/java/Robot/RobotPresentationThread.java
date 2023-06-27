@@ -1,5 +1,6 @@
 package Robot;
 
+import beans.CleaningRobotData;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -39,7 +40,9 @@ public class RobotPresentationThread extends Thread{
 
             @Override
             public void onError(Throwable t) {
-                System.out.println(t.getMessage().equals("ERRORE ERRORE"));
+
+                System.out.println(t);
+                //TODO gestire rimozione robot
             }
 
             @Override

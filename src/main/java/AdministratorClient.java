@@ -1,8 +1,10 @@
-import Robot.CleaningRobotData;
-import beans.GreenfieldModel;
+import beans.CleaningRobotData;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-import com.sun.jersey.api.client.*;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 
 import java.lang.reflect.Type;
 import java.util.List;

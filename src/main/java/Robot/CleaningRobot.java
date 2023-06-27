@@ -3,21 +3,23 @@ package Robot;
 import GRPC.RobotGRPCServer;
 import MQTT.RobotMqttSensorPublisher;
 import beans.BufferImpl;
+import beans.CleaningRobotData;
 import beans.GreenfieldDetails;
 import com.google.gson.Gson;
-import com.sun.jersey.api.client.*;
-import org.eclipse.paho.client.mqttv3.*;
+import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
 import simulators.PM10Simulator;
 
-import java.awt.*;
-import java.util.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class CleaningRobot {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
     private static final String ID = "id-" + (int) (1 + Math.random() * 100);
     private static String robotAddress;
-    private static final double MALFUNCTION_PROBABILITY = 0.1;
     private static int robotPort;
 
     public static void main(String[] args) throws InterruptedException {
@@ -26,25 +28,26 @@ public class CleaningRobot {
         setRobotsDetails();
 
         CleaningRobotData cleaningRobot = new CleaningRobotData(ID, robotAddress, robotPort);
-        clientResponse = postRequest(client, cleaningRobot);
+
+        CleaningRobotDetails.getInstance().setRobotInfo(cleaningRobot);
+        clientResponse = postRequest(client);
         System.out.println(clientResponse.toString());
 
         GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
 
         cleaningRobot.setPosition(details.getPosition());
         if (details.getRobots() != null)
-            cleaningRobot.setRobots(details.getRobots());
+            CleaningRobotDetails.getInstance().setRobots(details.getRobots());
         cleaningRobot.setDistrict(details.getDistrict());
-
-        RobotInputHandler robotInput = new RobotInputHandler(cleaningRobot);
+        RobotInputHandler robotInput = new RobotInputHandler();
         robotInput.start();
 
-        RobotGRPCServer serverGRPC = new RobotGRPCServer(cleaningRobot);
+        RobotGRPCServer serverGRPC = new RobotGRPCServer();
         serverGRPC.start();
 
-        if (cleaningRobot.getRobots().size() > 0) {
+        if (CleaningRobotDetails.getInstance().getRobots().size() > 0) {
             List<RobotPresentationThread> presentationThreads = new ArrayList<>();
-            for (CleaningRobotData robotToPresent: cleaningRobot.getRobots()) {
+            for (CleaningRobotData robotToPresent: CleaningRobotDetails.getInstance().getRobots()) {
                 RobotPresentationThread presentation = new RobotPresentationThread(cleaningRobot, robotToPresent);
                 presentationThreads.add(presentation);
                 presentation.start();
@@ -59,13 +62,13 @@ public class CleaningRobot {
             }
         }
 
-        RobotMqttSensorPublisher sensorPublisher = new RobotMqttSensorPublisher(cleaningRobot);
+        RobotMqttSensorPublisher sensorPublisher = new RobotMqttSensorPublisher();
         sensorPublisher.start();
 
-        MalfunctionThread robotProblems = new MalfunctionThread(cleaningRobot);
+        MalfunctionThread robotProblems = new MalfunctionThread();
         robotProblems.start();
 
-        BufferImpl buffer = new BufferImpl(cleaningRobot);
+        BufferImpl buffer = new BufferImpl();
         PM10Simulator simulator = new PM10Simulator(buffer);
         simulator.start();
     }
@@ -80,10 +83,10 @@ public class CleaningRobot {
         robotPort = Integer.parseInt(in.next());
     }
 
-    private static ClientResponse postRequest(Client client, CleaningRobotData cleaningRobot){
+    private static ClientResponse postRequest(Client client){
         String postPath = SERVER_ADDRESS + "/robots/addRobot";
         WebResource webResource = client.resource(postPath);
-        String input = new Gson().toJson(cleaningRobot);
+        String input = new Gson().toJson(CleaningRobotDetails.getInstance().getRobotInfo());
         System.out.println(input);
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);

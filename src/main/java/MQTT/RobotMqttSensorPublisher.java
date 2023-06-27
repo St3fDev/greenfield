@@ -1,14 +1,10 @@
 package MQTT;
 
-import Robot.CleaningRobot;
-import Robot.CleaningRobotData;
+import Robot.CleaningRobotDetails;
+import beans.CleaningRobotData;
 import beans.PollutionData;
-import beans.Statistic;
 import com.google.gson.Gson;
 import org.eclipse.paho.client.mqttv3.*;
-
-import java.util.List;
-import java.util.Random;
 
 public class RobotMqttSensorPublisher extends Thread{
 
@@ -17,17 +13,15 @@ public class RobotMqttSensorPublisher extends Thread{
     private static final int QOS = 2;
     private static final String ID = MqttClient.generateClientId();
     private static final int SLEEP_TIME = 15 * 1_000;
-    CleaningRobotData robot;
 
-    public RobotMqttSensorPublisher(CleaningRobotData robot) {
-        this.robot = robot;
-        topic = "greenfield/pollution/district" + robot.getDistrict();
+    public RobotMqttSensorPublisher() {
+        topic = "greenfield/pollution/district" + CleaningRobotDetails.getInstance().getRobotInfo().getDistrict();
     }
 
     @Override
     public void run() {
         while (true) {
-            PollutionData data = new PollutionData(robot.getId(), robot.getAverages(), System.currentTimeMillis());
+            PollutionData data = new PollutionData(CleaningRobotDetails.getInstance().getRobotInfo().getId(), CleaningRobotDetails.getInstance().getAverages(), System.currentTimeMillis());
 
             String payload = new Gson().toJson(data);
 
@@ -59,7 +53,7 @@ public class RobotMqttSensorPublisher extends Thread{
 
                 // Si genera il messaggio.
                 MqttMessage message = new MqttMessage(payload.getBytes());
-                robot.clearLastAvg();
+                CleaningRobotDetails.getInstance().clearLastAvg();
                 // Si definisce il QoS.
                 message.setQos(QOS);
                 System.out.printf("(%s) publication of the new message: %s...\n", ID, payload);

@@ -1,9 +1,8 @@
 package services;
 
-import Robot.CleaningRobotData;
+import beans.CleaningRobotData;
 import beans.GreenfieldDetails;
 import beans.GreenfieldModel;
-import com.google.gson.Gson;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -22,7 +21,6 @@ public class RobotService {
         List<CleaningRobotData> robots = GreenfieldModel.getInstance().getRobots();
         if (GreenfieldModel.getInstance().addRobot(cleaningRobot)) {
             GreenfieldDetails details = new GreenfieldDetails(cleaningRobot.getPosition(), robots, cleaningRobot.getDistrict());
-            String responseJson = new Gson().toJson(details);
             return Response.ok(details).build();
         }
         return Response.status(Status.CONFLICT).entity("this robot already exists").build();

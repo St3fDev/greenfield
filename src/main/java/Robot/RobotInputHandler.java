@@ -1,5 +1,6 @@
 package Robot;
 
+import beans.CleaningRobotData;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
@@ -13,11 +14,8 @@ import java.util.Scanner;
 
 public class RobotInputHandler extends Thread {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
-    private final CleaningRobotData robot;
 
-    public RobotInputHandler(CleaningRobotData robot) {
-        this.robot = robot;
-    }
+    public RobotInputHandler() {}
 
     @Override
     public void run() {
@@ -33,17 +31,18 @@ public class RobotInputHandler extends Thread {
         }
         Client client = Client.create();
         System.out.println("Removing the robot from Greenfield");
-        String removePath = SERVER_ADDRESS + "/robots/removeRobot/" + robot.getId();
+        String removePath = SERVER_ADDRESS + "/robots/removeRobot/" + CleaningRobotDetails.getInstance().getRobotInfo().getId();
         deleteRequest(client, removePath);
-        RobotServiceOuterClass.RobotExitNotification exitRequest = RobotServiceOuterClass.RobotExitNotification.newBuilder().setId(robot.getId()).build();
-        if (robot.getRobots().size() > 0) {
-            for (CleaningRobotData otherRobot : robot.getRobots()) {
+        if (CleaningRobotDetails.getInstance().getRobots().size() > 0) {
+            RobotServiceOuterClass.RobotExitNotification exitRequest = RobotServiceOuterClass.RobotExitNotification.newBuilder().setId(CleaningRobotDetails.getInstance().getRobotInfo().getId()).build();
+            for (CleaningRobotData otherRobot : CleaningRobotDetails.getInstance().getRobots()) {
                 ManagedChannel channel = ManagedChannelBuilder.forTarget(otherRobot.getAddress() + ":" + otherRobot.getPort()).usePlaintext(true).build();
                 RobotServiceGrpc.RobotServiceBlockingStub stub = RobotServiceGrpc.newBlockingStub(channel);
                 stub.notifyExit(exitRequest);
                 channel.shutdownNow();
             }
         }
+        // TODO NON VA BENE
         System.exit(0);
 
     }
