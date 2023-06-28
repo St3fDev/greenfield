@@ -10,6 +10,7 @@ import io.grpc.ManagedChannelBuilder;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
 
+import java.util.List;
 import java.util.Scanner;
 
 public class RobotInputHandler extends Thread {
@@ -26,9 +27,19 @@ public class RobotInputHandler extends Thread {
         Scanner scanner = new Scanner(System.in);
         String input = "";
         while (!input.equalsIgnoreCase("quit")) {
-            /*if (input.equalsIgnoreCase("fix")) {
-
-            }*/
+            if (input.equalsIgnoreCase("fix")) {
+                try {
+                    List<CleaningRobotData> robotSnapshot = CleaningRobotDetails.getInstance().getRobots();
+                    if (!CleaningRobotDetails.getInstance().isWaitingForMaintenance()) {
+                        MalfunctionThread.handleMalfunction(robotSnapshot);
+                    }
+                    else {
+                        System.out.println("the robot is already requiring access from the mechanic or is already in maintenance");
+                    }
+                    } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             input = scanner.nextLine();
         }
         Client client = Client.create();

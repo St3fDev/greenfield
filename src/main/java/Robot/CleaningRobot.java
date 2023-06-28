@@ -62,15 +62,17 @@ public class CleaningRobot {
             }
         }
 
-        RobotMqttSensorPublisher sensorPublisher = new RobotMqttSensorPublisher();
-        sensorPublisher.start();
+        //RobotMqttSensorPublisher sensorPublisher = new RobotMqttSensorPublisher();
+        //sensorPublisher.start();
 
         MalfunctionThread robotProblems = new MalfunctionThread();
         robotProblems.start();
 
-        BufferImpl buffer = new BufferImpl();
+        /*BufferImpl buffer = new BufferImpl();
         PM10Simulator simulator = new PM10Simulator(buffer);
+        PM10Consumer consumer = new PM10Consumer(buffer);
         simulator.start();
+        consumer.start();*/
     }
 
     private static void setRobotsDetails() {

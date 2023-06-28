@@ -28,26 +28,27 @@ public class BufferImpl implements Buffer {
     }
     @Override
     public void addMeasurement(Measurement m) {
-        measurements.add(m);
-        if (measurements.size() == BUFFER_SIZE) {
-            readAllAndClean();
-        }
+            synchronized (this) {
+                measurements.add(m);
+                if (measurements.size() == BUFFER_SIZE) {
+                    notify();
+                }
+            }
     }
 
     @Override
     public List<Measurement> readAllAndClean() {
+        System.out.println("8 DA CAMPIONARE:");
+        /*for(Measurement me : measurements) {
+            System.out.println(me.getValue());
+        }*/
         List<Measurement> measurementsToProcess = new ArrayList<>(measurements);
         measurements.subList(0, (int) (BUFFER_SIZE * OVERLAP_FACTOR)).clear();
-        CleaningRobotDetails.getInstance().addStatistic(calculateAverage(measurementsToProcess));
-        return null;
-    }
-
-    private Statistic calculateAverage(List<Measurement> measurements) {
-        double sum = 0.0;
-        for (Measurement m : measurements) {
-            sum += m.getValue();
-        }
-        return new Statistic(sum/measurements.size(), System.currentTimeMillis());
+        System.out.println("DOPO RIMOZIONE:");
+        /*for(Measurement me : measurements) {
+            System.out.println(me.getValue());
+        }*/
+        return measurementsToProcess;
     }
 
 }

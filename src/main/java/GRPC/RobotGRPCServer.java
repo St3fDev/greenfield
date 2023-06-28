@@ -19,9 +19,7 @@ public class RobotGRPCServer extends Thread{
             server.start();
             System.out.println("> GRPC Server started!");
             server.awaitTermination();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }

@@ -12,7 +12,8 @@ import it.robot.grpc.RobotServiceOuterClass.Status;
 
 public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
 
-    public RobotServiceImpl(){}
+    public RobotServiceImpl() {
+    }
 
     @Override
     public void presentation(RobotPresentation request, StreamObserver<RobotResponse> responseObserver) {
@@ -22,9 +23,9 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
                 .build();
         responseObserver.onNext(robotResponse);
         responseObserver.onCompleted();
-        System.out.println("> Adding drone "+request.getId()+" to my topology ...");
+        System.out.println("> Adding robot " + request.getId() + " to my topology ...");
         CleaningRobotData robotToInsert = new CleaningRobotData(request.getId(), request.getAddress(), request.getPort());
-        robotToInsert.setPosition(new Position(request.getPosition().getX(),request.getPosition().getY()));
+        robotToInsert.setPosition(new Position(request.getPosition().getX(), request.getPosition().getY()));
         CleaningRobotDetails.getInstance().addRobot(robotToInsert);
     }
 
@@ -57,13 +58,11 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
                     throw new RuntimeException(e);
                 }
             }
-            if (!CleaningRobotDetails.getInstance().isWaitingForMaintenance() && !CleaningRobotDetails.getInstance().isInMaintenance()) {
-                RobotServiceOuterClass.MechanicAccessResponse response = RobotServiceOuterClass.MechanicAccessResponse.newBuilder()
-                        .setAck("OK")
-                        .build();
-                responseObserver.onNext(response);
-                responseObserver.onCompleted();
-            }
+            RobotServiceOuterClass.MechanicAccessResponse response = RobotServiceOuterClass.MechanicAccessResponse.newBuilder()
+                    .setAck("OK")
+                    .build();
+            responseObserver.onNext(response);
+            responseObserver.onCompleted();
         }
     }
 
