@@ -14,8 +14,10 @@ import java.util.Scanner;
 
 public class RobotInputHandler extends Thread {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
-
-    public RobotInputHandler() {}
+    MalfunctionThread mt;
+    public RobotInputHandler() {
+        mt = new MalfunctionThread();
+    }
 
     @Override
     public void run() {

@@ -10,8 +10,21 @@ public class CleaningRobotDetails {
 
     private List<CleaningRobotData> robots = new ArrayList<>();
     private boolean isInMaintenance;
+
+    private final Object lock = new Object();
     private List<Statistic> averages = new ArrayList<>();
     private CleaningRobotData robotInfo;
+    private boolean waitingForMaintenance;
+    private long timestamp;
+
+    public boolean isWaitingForMaintenance() {
+        return waitingForMaintenance;
+    }
+
+    public synchronized void setWaitingForMaintenance(boolean waitingForMaintenance) {
+        this.timestamp = System.currentTimeMillis();
+        this.waitingForMaintenance = waitingForMaintenance;
+    }
 
     public long getTimestamp() {
         return timestamp;
@@ -20,9 +33,6 @@ public class CleaningRobotDetails {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-
-    private long timestamp;
-
     private static CleaningRobotDetails instance = null;
 
     public static synchronized CleaningRobotDetails getInstance() {
@@ -56,12 +66,12 @@ public class CleaningRobotDetails {
         this.averages = averages;
     }
 
-    public boolean isInMaintenance() {
-        return isInMaintenance;
+    public synchronized boolean isInMaintenance() {
+            return isInMaintenance;
     }
 
-    public void setInMaintenance(boolean inMaintenance) {
-        isInMaintenance = inMaintenance;
+    public synchronized void setInMaintenance(boolean isInMaintenance) {
+        this.isInMaintenance = isInMaintenance;
     }
 
     public List<CleaningRobotData> getRobots() {
@@ -85,5 +95,12 @@ public class CleaningRobotDetails {
         synchronized (this.averages) {
             this.averages.add(stat);
         }
+    }
+    public boolean checkTimestamp(long timestamp) {
+        return this.timestamp < timestamp;
+    }
+
+    public Object getLock() {
+        return lock;
     }
 }

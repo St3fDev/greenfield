@@ -36,7 +36,7 @@ message MechanicAccessRequest{
 }
 
 message MechanicAccessResponse{
-  required bool granted = 1;
+  required string ack = 1;
 }
 
 service RobotService{

@@ -24,7 +24,6 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
         responseObserver.onCompleted();
         System.out.println("> Adding drone "+request.getId()+" to my topology ...");
         CleaningRobotData robotToInsert = new CleaningRobotData(request.getId(), request.getAddress(), request.getPort());
-        System.out.println("I'M " + CleaningRobotDetails.getInstance().getRobotInfo().getId());
         robotToInsert.setPosition(new Position(request.getPosition().getX(),request.getPosition().getY()));
         CleaningRobotDetails.getInstance().addRobot(robotToInsert);
     }
@@ -38,9 +37,34 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
         System.out.println("Removing robot: " + request.getId() + " to my topology...");
     }
 
+    /*
+    quando il robot manda l'ok:
+	    quando non è interessato ad andare dal meccanico
+	    quando è interessato ma il suo timestamp è maggiore di quello dell'altro robot che ha fatto la richiesta
+    Quando non manda l'ok:
+	    quando è già dal meccanico
+	    quando il suo timestamp è minore del timestamp dell'altro robot che ha fatto la richiesta
+     */
     @Override
     public void accessToMechanic(RobotServiceOuterClass.MechanicAccessRequest request, StreamObserver<RobotServiceOuterClass.MechanicAccessResponse> responseObserver) {
-
+        synchronized (CleaningRobotDetails.getInstance().getLock()) {
+            while ((CleaningRobotDetails.getInstance().isWaitingForMaintenance() &&
+                    CleaningRobotDetails.getInstance().checkTimestamp(request.getTimestamp())) ||
+                    CleaningRobotDetails.getInstance().isInMaintenance()) {
+                try {
+                    CleaningRobotDetails.getInstance().getLock().wait();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (!CleaningRobotDetails.getInstance().isWaitingForMaintenance() && !CleaningRobotDetails.getInstance().isInMaintenance()) {
+                RobotServiceOuterClass.MechanicAccessResponse response = RobotServiceOuterClass.MechanicAccessResponse.newBuilder()
+                        .setAck("OK")
+                        .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+        }
     }
 
 
