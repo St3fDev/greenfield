@@ -30,10 +30,12 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
     }
 
     @Override
-    public void notifyExit(RobotServiceOuterClass.RobotExitNotification request, StreamObserver<RobotServiceOuterClass.Empty> responseObserver) {
+    public void notifyExit(RobotServiceOuterClass.RobotExitRequest request, StreamObserver<RobotServiceOuterClass.RobotExitResponse> responseObserver) {
         String idRobotToRemove = request.getId();
         CleaningRobotDetails.getInstance().removeRobot(idRobotToRemove);
-        responseObserver.onNext(RobotServiceOuterClass.Empty.newBuilder().build());
+        responseObserver.onNext(RobotServiceOuterClass.RobotExitResponse.newBuilder()
+                        .setId(CleaningRobotDetails.getInstance().getRobotInfo().getId())
+                .build());
         responseObserver.onCompleted();
         System.out.println("Removing robot: " + request.getId() + " to my topology...");
     }
@@ -65,6 +67,4 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
             responseObserver.onCompleted();
         }
     }
-
-
 }

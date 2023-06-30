@@ -1,6 +1,5 @@
 package beans;
 
-import Robot.CleaningRobotDetails;
 import simulators.Buffer;
 import simulators.Measurement;
 
@@ -38,13 +37,13 @@ public class BufferImpl implements Buffer {
 
     @Override
     public List<Measurement> readAllAndClean() {
-        System.out.println("8 DA CAMPIONARE:");
+        //System.out.println("8 DA CAMPIONARE:");
         /*for(Measurement me : measurements) {
             System.out.println(me.getValue());
         }*/
         List<Measurement> measurementsToProcess = new ArrayList<>(measurements);
         measurements.subList(0, (int) (BUFFER_SIZE * OVERLAP_FACTOR)).clear();
-        System.out.println("DOPO RIMOZIONE:");
+        //System.out.println("DOPO RIMOZIONE:");
         /*for(Measurement me : measurements) {
             System.out.println(me.getValue());
         }*/

@@ -16,6 +16,7 @@ public class MalfunctionThread extends Thread {
     private static final double MALFUNCTION_PROBABILITY = 0.1; // 10% probability
     private static final Object lock = new Object();
     private Random random;
+    private volatile boolean stopCondition = false;
 
     public MalfunctionThread() {
         this.random = new Random();
@@ -23,12 +24,12 @@ public class MalfunctionThread extends Thread {
 
     @Override
     public void run() {
-        while (true) {
+        while (!stopCondition) {
             try {
                 Thread.sleep(DELAY);
-                synchronized (lock) {
+                synchronized (CleaningRobotDetails.getInstance().getLock()) {
                     while (CleaningRobotDetails.getInstance().isInMaintenance()) {
-                        lock.wait();
+                        CleaningRobotDetails.getInstance().getLock().wait();
                     }
                 }
                 if (random.nextDouble() < MALFUNCTION_PROBABILITY) {
@@ -41,9 +42,9 @@ public class MalfunctionThread extends Thread {
                 break;
             }
         }
+        System.out.println("---------------- MALFUNCTION THREAD CLOSED -----------------");
     }
 
-    //TODO TUTTO BUGGATO HAHAHAH
     public static void handleMalfunction(List<CleaningRobotData> robotSnapshot) throws InterruptedException {
         CleaningRobotDetails.getInstance().setWaitingForMaintenance(true);
         if (robotSnapshot.size() > 0) {
@@ -55,6 +56,7 @@ public class MalfunctionThread extends Thread {
                     .build();
             for (CleaningRobotData otherRobot : robotSnapshot) {
                 Thread thread = new Thread(() -> {
+                    //TODO: da rimuovere: utilizzato solo per scopi di debug
                     try {
                         Thread.sleep(5000);
                     } catch (InterruptedException e) {
@@ -112,8 +114,9 @@ public class MalfunctionThread extends Thread {
             CleaningRobotDetails.getInstance().setInMaintenance(false);
             CleaningRobotDetails.getInstance().getLock().notifyAll();
         }
-        synchronized (lock) {
-            lock.notify();
-        }
+    }
+
+    public void stopMeGently() {
+        stopCondition = true;
     }
 }

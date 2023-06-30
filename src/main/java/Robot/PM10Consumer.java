@@ -13,11 +13,13 @@ public class PM10Consumer extends Thread {
         this.buffer = buffer;
     }
 
+    private volatile boolean stopCondition = false;
+
     @Override
     public void run() {
-        while (true) {
+        while (!stopCondition) {
             synchronized (buffer) {
-                while (buffer.getMeasurements().size() < 8) {
+                while (buffer.getMeasurements().size() < 8 && !stopCondition) {
                     try {
                         buffer.wait(); // Consumer attende finché il buffer non raggiunge la dimensione desiderata
                     } catch (InterruptedException e) {
@@ -25,13 +27,14 @@ public class PM10Consumer extends Thread {
                     }
                 }
                 List<Measurement> measurementToProcess = buffer.readAllAndClean();
-                System.out.println("NEL CONSUMER CAZZO:");
+                //System.out.println("NEL CONSUMER:");
                 /*for(Measurement me : measurements) {
                 System.out.println(me.getValue());
                  }*/
                 CleaningRobotDetails.getInstance().addStatistic(calculateAverage(measurementToProcess));
             }
         }
+        System.out.println("---------------- PM10 CONSUMER CLOSED -----------------");
     }
 
     private Statistic calculateAverage(List<Measurement> measurements) {
@@ -40,5 +43,12 @@ public class PM10Consumer extends Thread {
             sum += m.getValue();
         }
         return new Statistic(sum / measurements.size(), System.currentTimeMillis());
+    }
+
+    public void stopMeGently() {
+        stopCondition = true;
+        synchronized (buffer) {
+            buffer.notify();
+        }
     }
 }

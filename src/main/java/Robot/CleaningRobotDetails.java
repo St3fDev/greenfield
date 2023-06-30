@@ -103,4 +103,5 @@ public class CleaningRobotDetails {
     public Object getLock() {
         return lock;
     }
+
 }

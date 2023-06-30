@@ -26,7 +26,11 @@ message Position {
   required int32 y = 2;
 }
 
-message RobotExitNotification {
+message RobotExitRequest {
+  required string id = 1;
+}
+
+message RobotExitResponse {
   required string id = 1;
 }
 
@@ -41,8 +45,9 @@ message MechanicAccessResponse{
 
 service RobotService{
   rpc presentation(RobotPresentation) returns (RobotResponse);
-  rpc notifyExit(RobotExitNotification) returns (Empty);
+  rpc notifyExit(RobotExitRequest) returns (RobotExitResponse);
   rpc accessToMechanic(MechanicAccessRequest) returns (MechanicAccessResponse);
+  rpc heartbeatService(Empty) returns (Empty);
 }
 
 

@@ -1,7 +1,6 @@
 package GRPC;
 
 import Robot.CleaningRobotDetails;
-import beans.CleaningRobotData;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 
@@ -11,6 +10,7 @@ public class RobotGRPCServer extends Thread{
 
     public RobotGRPCServer(){}
 
+    // TODO gestire chiusura server gRPC
     @Override
     public void run() {
         //Starting the GRPC server for

@@ -1,18 +1,18 @@
 package MQTT;
 
 import Robot.CleaningRobotDetails;
-import beans.CleaningRobotData;
 import beans.PollutionData;
 import com.google.gson.Gson;
 import org.eclipse.paho.client.mqttv3.*;
 
-public class RobotMqttSensorPublisher extends Thread{
+public class RobotMqttSensorPublisher extends Thread {
 
     private static final String BROKER = "tcp://localhost:1883";
     private static String topic;
     private static final int QOS = 2;
     private static final String ID = MqttClient.generateClientId();
     private static final int SLEEP_TIME = 15 * 1_000;
+    private volatile boolean stopCondition = false;
 
     public RobotMqttSensorPublisher() {
         topic = "greenfield/pollution/district" + CleaningRobotDetails.getInstance().getRobotInfo().getDistrict();
@@ -20,7 +20,21 @@ public class RobotMqttSensorPublisher extends Thread{
 
     @Override
     public void run() {
-        while (true) {
+        while (!stopCondition) {
+            try {
+                Thread.sleep(SLEEP_TIME);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+            synchronized (CleaningRobotDetails.getInstance().getLock()) {
+                while (CleaningRobotDetails.getInstance().isWaitingForMaintenance()) {
+                    try {
+                        CleaningRobotDetails.getInstance().getLock().wait();
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
             PollutionData data = new PollutionData(CleaningRobotDetails.getInstance().getRobotInfo().getId(), CleaningRobotDetails.getInstance().getAverages(), System.currentTimeMillis());
 
             String payload = new Gson().toJson(data);
@@ -68,12 +82,11 @@ public class RobotMqttSensorPublisher extends Thread{
                 System.err.printf("An error occurred: %s\n", mqttException);
             }
 
-            // Si aspettano cinque secondi e si invia nuovamente un messaggio.
-            try {
-                Thread.sleep(SLEEP_TIME);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
         }
+        System.out.println("------------- ROBOT SENSOR PUBLISHER CLOSED -------------");
+    }
+
+    public void stopMeGently() {
+        stopCondition = true;
     }
 }
