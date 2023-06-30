@@ -39,7 +39,8 @@ public class RobotMqttSensorPublisher extends Thread {
 
             String payload = new Gson().toJson(data);
 
-            try (MqttClient clientMqtt = new MqttClient(BROKER, ID)) {
+            try {
+                MqttClient clientMqtt = new MqttClient(BROKER, ID);
                 MqttConnectOptions connOpts = new MqttConnectOptions();
                 connOpts.setCleanSession(true);
 
@@ -47,23 +48,6 @@ public class RobotMqttSensorPublisher extends Thread {
                 //System.out.printf("(%s)  connection to the broker %s...\n", ID, BROKER);
                 clientMqtt.connect(connOpts);
                 //System.out.printf("(%s) connected\n", ID);
-
-                // Si definisce il callback.
-                clientMqtt.setCallback(new MqttCallback() {
-                    public void messageArrived(String topic, MqttMessage message) {
-                        // Non utilizzato dai publisher.
-                    }
-
-                    public void connectionLost(Throwable cause) {
-                        System.out.printf("(%s) Connection lost. Caused by: %s\n", ID, cause.getMessage());
-                    }
-
-                    public void deliveryComplete(IMqttDeliveryToken token) {
-                        if (token.isComplete()) {
-                            System.out.printf("(%s) message successfully delivered\n", ID);
-                        }
-                    }
-                });
 
                 // Si genera il messaggio.
                 MqttMessage message = new MqttMessage(payload.getBytes());

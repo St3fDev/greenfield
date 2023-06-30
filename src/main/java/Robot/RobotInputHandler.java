@@ -33,8 +33,7 @@ public class RobotInputHandler extends Thread {
         System.out.println("Digit 'exit' to remove the robot from Greenfield");
         System.out.println("Digit 'fix' to send robot to mechanic");
         Scanner scanner = new Scanner(System.in);
-        String input = "";
-        while (!input.equalsIgnoreCase("quit")) {
+        String input = ""; while (!input.equalsIgnoreCase("quit")) {
             if (input.equalsIgnoreCase("fix")) {
                 try {
                     List<CleaningRobotData> robotSnapshot = CleaningRobotDetails.getInstance().getRobots();
@@ -49,6 +48,7 @@ public class RobotInputHandler extends Thread {
             }
             input = scanner.nextLine();
         }
+
         Client client = Client.create();
         System.out.println("Removing the robot from Greenfield");
         String removePath = SERVER_ADDRESS + "/robots/removeRobot/" + CleaningRobotDetails.getInstance().getRobotInfo().getId();
@@ -63,7 +63,7 @@ public class RobotInputHandler extends Thread {
 
                     @Override
                     public void onNext(RobotServiceOuterClass.RobotExitResponse response) {
-                        System.out.println("successfully removed from the robot: " + response.getId());
+                        System.out.println("successfully removed from list of the robot: " + response.getId());
                     }
 
                     @Override

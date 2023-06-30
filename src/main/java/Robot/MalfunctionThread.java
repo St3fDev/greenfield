@@ -28,7 +28,7 @@ public class MalfunctionThread extends Thread {
             try {
                 Thread.sleep(DELAY);
                 synchronized (CleaningRobotDetails.getInstance().getLock()) {
-                    while (CleaningRobotDetails.getInstance().isInMaintenance()) {
+                    while (CleaningRobotDetails.getInstance().isWaitingForMaintenance()) {
                         CleaningRobotDetails.getInstance().getLock().wait();
                     }
                 }
@@ -49,7 +49,7 @@ public class MalfunctionThread extends Thread {
         CleaningRobotDetails.getInstance().setWaitingForMaintenance(true);
         if (robotSnapshot.size() > 0) {
             SimpleLatch latch = new SimpleLatch(CleaningRobotDetails.getInstance().getRobots().size());
-            System.out.println("Numero di robot a cui richiedere l'accesso: " + CleaningRobotDetails.getInstance().getRobots().size());
+            System.out.println("Number of robots to request access to: " + CleaningRobotDetails.getInstance().getRobots().size());
             RobotServiceOuterClass.MechanicAccessRequest request = RobotServiceOuterClass.MechanicAccessRequest.newBuilder()
                     .setId(CleaningRobotDetails.getInstance().getRobotInfo().getId())
                     .setTimestamp(CleaningRobotDetails.getInstance().getTimestamp())

@@ -14,7 +14,7 @@ public class CleaningRobotDetails {
     private final Object lock = new Object();
     private List<Statistic> averages = new ArrayList<>();
     private CleaningRobotData robotInfo;
-    private boolean waitingForMaintenance;
+    private volatile boolean waitingForMaintenance;
     private long timestamp;
 
     public boolean isWaitingForMaintenance() {
