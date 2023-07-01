@@ -7,6 +7,8 @@ import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
 
+import java.util.concurrent.TimeUnit;
+
 
 public class RobotPresentationThread extends Thread{
     CleaningRobotData robot;
@@ -40,9 +42,10 @@ public class RobotPresentationThread extends Thread{
 
             @Override
             public void onError(Throwable t) {
-
-                System.out.println(t);
-                //TODO gestire rimozione robot
+                System.out.println("Removed robot " + destinationRobot.getId() + " because it was unreachable");
+                RESTMethod.deleteRequest(destinationRobot.getId());
+                CleaningRobotDetails.getInstance().getRobots().removeIf((elem) -> elem.getId().equals(destinationRobot.getId()));
+                channel.shutdownNow();
             }
 
             @Override
@@ -50,5 +53,10 @@ public class RobotPresentationThread extends Thread{
                 channel.shutdownNow();
             }
         });
+        try {
+            channel.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

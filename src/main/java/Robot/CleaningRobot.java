@@ -12,6 +12,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import simulators.PM10Simulator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -19,12 +20,12 @@ import java.util.Scanner;
 public class CleaningRobot {
 
     private static final String SERVER_ADDRESS = "http://localhost:1337";
-    private static final String ID = "id-" + (int) (1 + Math.random() * 100);
+    private static final String ID = "id-" + (int) (1 + Math.random() * 1000);
     private static String robotAddress;
     private static int robotPort;
-    private static List<Thread> threadsToStop = new ArrayList<>();
+    private static final List<Thread> threadsToStop = new ArrayList<>();
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Client client = Client.create();
         ClientResponse clientResponse;
         setRobotsDetails();
@@ -32,7 +33,7 @@ public class CleaningRobot {
         CleaningRobotData cleaningRobot = new CleaningRobotData(ID, robotAddress, robotPort);
 
         CleaningRobotDetails.getInstance().setRobotInfo(cleaningRobot);
-        clientResponse = postRequest(client);
+        clientResponse = RESTMethod.postRequest(client);
         //System.out.println(clientResponse.toString());
 
         GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
@@ -42,12 +43,11 @@ public class CleaningRobot {
             CleaningRobotDetails.getInstance().setRobots(details.getRobots());
         cleaningRobot.setDistrict(details.getDistrict());
 
-        RobotGRPCServer serverGRPC = new RobotGRPCServer();
-        serverGRPC.start();
+        RobotGRPCServer.startGRPCServer();
 
         if (CleaningRobotDetails.getInstance().getRobots().size() > 0) {
             List<RobotPresentationThread> presentationThreads = new ArrayList<>();
-            for (CleaningRobotData robotToPresent: CleaningRobotDetails.getInstance().getRobots()) {
+            for (CleaningRobotData robotToPresent : CleaningRobotDetails.getInstance().getRobots()) {
                 RobotPresentationThread presentation = new RobotPresentationThread(cleaningRobot, robotToPresent);
                 presentationThreads.add(presentation);
                 presentation.start();
@@ -77,32 +77,39 @@ public class CleaningRobot {
         consumer.start();
         threadsToStop.add(simulator);
         threadsToStop.add(consumer);
-        RobotInputHandler robotInput = new RobotInputHandler(threadsToStop);
+        HeartbeatThread hbRobot = new HeartbeatThread();
+        hbRobot.start();
+        threadsToStop.add(hbRobot);
+        RobotInputThread robotInput = new RobotInputThread(threadsToStop);
         robotInput.start();
     }
 
     // TODO gestire input errati
     private static void setRobotsDetails() {
         Scanner in = new Scanner(System.in);
+        boolean validPort = false;
+
         System.out.println("Type the address of the robot: ");
         System.out.print("> ");
         robotAddress = in.next();
-        System.out.println("type the port of the robot: ");
-        System.out.print(">  ");
-        robotPort = Integer.parseInt(in.next());
-    }
+        while (!validPort) {
+            System.out.println("Type the port of the robot: ");
+            System.out.print("> ");
+            robotPort = Integer.parseInt(in.next());
 
-    private static ClientResponse postRequest(Client client){
-        String postPath = SERVER_ADDRESS + "/robots/addRobot";
-        WebResource webResource = client.resource(postPath);
-        String input = new Gson().toJson(CleaningRobotDetails.getInstance().getRobotInfo());
-        System.out.println(input);
-        try {
-            return webResource.type("application/json").post(ClientResponse.class, input);
-        } catch (ClientHandlerException e) {
-            System.out.println("Server unavailable");
-            return null;
+            validPort = true; // Assume che la porta sia valida
+
+            // Verifica se l'indirizzo o la porta sono già occupati
+            if (RobotPortChecker.isPortOccupied(robotAddress, robotPort)) {
+                System.out.println("The specified port is already occupied. Please choose another port.");
+                validPort = false; // La porta non è valida
+            }
+
+            if (!validPort) {
+                System.out.println("Invalid address or port. Please try again.");
+            }
         }
+
     }
 
 

@@ -12,25 +12,25 @@ import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
 import simulators.PM10Simulator;
-import simulators.Simulator;
 
 import java.util.List;
 import java.util.Scanner;
 
-public class RobotInputHandler extends Thread {
+public class RobotInputThread extends Thread {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
     MalfunctionThread mt;
 
     List<Thread> threadsToStop;
 
-    public RobotInputHandler(List<Thread> threadsToStop) {
+    public RobotInputThread(List<Thread> threadsToStop) {
         this.threadsToStop = threadsToStop;
         mt = new MalfunctionThread();
+        setName("RobotInputThread");
     }
 
     @Override
     public void run() {
-        System.out.println("Digit 'exit' to remove the robot from Greenfield");
+        System.out.println("Digit 'quit' to remove the robot from Greenfield");
         System.out.println("Digit 'fix' to send robot to mechanic");
         Scanner scanner = new Scanner(System.in);
         String input = ""; while (!input.equalsIgnoreCase("quit")) {
@@ -49,14 +49,12 @@ public class RobotInputHandler extends Thread {
             input = scanner.nextLine();
         }
 
-        Client client = Client.create();
         System.out.println("Removing the robot from Greenfield");
-        String removePath = SERVER_ADDRESS + "/robots/removeRobot/" + CleaningRobotDetails.getInstance().getRobotInfo().getId();
-        deleteRequest(client, removePath);
-        if (CleaningRobotDetails.getInstance().getRobots().size() > 0) {
-            //TODO capire cosa succede se invia la richiesta di uscita ad un robot crashato
+        RESTMethod.deleteRequest(CleaningRobotDetails.getInstance().getRobotInfo().getId());
+        List<CleaningRobotData> snapshotRobot = CleaningRobotDetails.getInstance().getRobots();
+        if (snapshotRobot.size() > 0) {
             RobotServiceOuterClass.RobotExitRequest exitRequest = RobotServiceOuterClass.RobotExitRequest.newBuilder().setId(CleaningRobotDetails.getInstance().getRobotInfo().getId()).build();
-            for (CleaningRobotData otherRobot : CleaningRobotDetails.getInstance().getRobots()) {
+            for (CleaningRobotData otherRobot : snapshotRobot) {
                 ManagedChannel channel = ManagedChannelBuilder.forTarget(otherRobot.getAddress() + ":" + otherRobot.getPort()).usePlaintext(true).build();
                 RobotServiceGrpc.RobotServiceStub stub = RobotServiceGrpc.newStub(channel);
                 stub.notifyExit(exitRequest, new StreamObserver<RobotServiceOuterClass.RobotExitResponse>(){
@@ -92,6 +90,8 @@ public class RobotInputHandler extends Thread {
                     ((PM10Simulator) thread).stopMeGently();
                 } else if (thread instanceof PM10Consumer) {
                     ((PM10Consumer) thread).stopMeGently();
+                } else if(thread instanceof  HeartbeatThread) {
+                    ((HeartbeatThread) thread).stopMeGently();
                 }
             }
         }
@@ -107,14 +107,5 @@ public class RobotInputHandler extends Thread {
 
         System.out.println("exit completed!");
         System.exit(0);
-    }
-
-    private static void deleteRequest(Client client, String url) {
-        WebResource webResource = client.resource(url);
-        try {
-            webResource.type("application/json").delete(ClientResponse.class);
-        } catch (ClientHandlerException e) {
-            System.out.println("Server unavailable");
-        }
     }
 }

@@ -27,6 +27,9 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
         CleaningRobotData robotToInsert = new CleaningRobotData(request.getId(), request.getAddress(), request.getPort());
         robotToInsert.setPosition(new Position(request.getPosition().getX(), request.getPosition().getY()));
         CleaningRobotDetails.getInstance().addRobot(robotToInsert);
+        synchronized (CleaningRobotDetails.getInstance().getSizeListLock()) {
+            CleaningRobotDetails.getInstance().getSizeListLock().notify();
+        }
     }
 
     @Override
@@ -67,4 +70,14 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
             responseObserver.onCompleted();
         }
     }
+
+    @Override
+    public void heartbeatService(RobotServiceOuterClass.Empty request, StreamObserver<RobotServiceOuterClass.HeartbeatResponse> responseObserver) {
+        RobotServiceOuterClass.HeartbeatResponse response = RobotServiceOuterClass.HeartbeatResponse.newBuilder()
+                .setId(CleaningRobotDetails.getInstance().getRobotInfo().getId())
+                .build();
+        responseObserver.onNext(response);
+    }
+
+
 }

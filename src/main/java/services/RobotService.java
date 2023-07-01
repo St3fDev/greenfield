@@ -30,9 +30,11 @@ public class RobotService {
     @DELETE
     @Consumes({"application/json", "application/xml"})
     public Response removeCleaningRobot(@PathParam("id") String id) {
-        GreenfieldModel.getInstance().removeRobot(id);
-        System.out.println("ROBOT : " + id + " REMOVED");
-        return Response.ok().entity("The robot with id: " + id + " has been removed").build();
+        if(GreenfieldModel.getInstance().removeRobot(id)) {
+            System.out.println("ROBOT : " + id + " REMOVED");
+            return Response.ok().entity("The robot with id: " + id + " has been removed").build();
+        }
+        return Response.status(Status.GONE).entity("This robot was already removed").build();
     }
 }
 

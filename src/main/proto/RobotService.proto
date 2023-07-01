@@ -43,11 +43,15 @@ message MechanicAccessResponse{
   required string ack = 1;
 }
 
+message HeartbeatResponse {
+  required string id = 1;
+}
+
 service RobotService{
   rpc presentation(RobotPresentation) returns (RobotResponse);
   rpc notifyExit(RobotExitRequest) returns (RobotExitResponse);
   rpc accessToMechanic(MechanicAccessRequest) returns (MechanicAccessResponse);
-  rpc heartbeatService(Empty) returns (Empty);
+  rpc heartbeatService(Empty) returns (HeartbeatResponse);
 }
 
 

@@ -8,10 +8,6 @@ import java.io.IOException;
 public class AdministratorServer {
     private static final String HOST = "localhost";
     private static final int PORT = 1337;
-    private static final String BROKER_ADDRESS = "tcp://localhost:1883";
-    private static final String ID = MqttClient.generateClientId();
-    private static final String[] TOPICS = {"greenfield/pollution/district1", "greenfield/pollution/district2", "greenfield/pollution/district3", "greenfield/pollution/district4"};
-    private static final int[] QOSs = {2,2,2,2};
 
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServerFactory.create("http://"+HOST + ":" + PORT + "/");

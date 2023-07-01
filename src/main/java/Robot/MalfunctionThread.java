@@ -32,6 +32,7 @@ public class MalfunctionThread extends Thread {
                         CleaningRobotDetails.getInstance().getLock().wait();
                     }
                 }
+                System.out.println("SONO QUI SPERO DI NO");
                 if (random.nextDouble() < MALFUNCTION_PROBABILITY) {
                     System.out.println("Robot malfunction occurred!");
                     List<CleaningRobotData> robotSnapshot = CleaningRobotDetails.getInstance().getRobots();

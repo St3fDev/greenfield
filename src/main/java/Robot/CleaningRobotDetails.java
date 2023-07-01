@@ -10,7 +10,7 @@ public class CleaningRobotDetails {
 
     private List<CleaningRobotData> robots = new ArrayList<>();
     private boolean isInMaintenance;
-
+    private final Object sizeListLock = new Object();
     private final Object lock = new Object();
     private List<Statistic> averages = new ArrayList<>();
     private CleaningRobotData robotInfo;
@@ -102,6 +102,10 @@ public class CleaningRobotDetails {
 
     public Object getLock() {
         return lock;
+    }
+
+    public Object getSizeListLock() {
+         return sizeListLock;
     }
 
 }

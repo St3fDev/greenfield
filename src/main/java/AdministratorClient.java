@@ -1,4 +1,6 @@
+import Robot.RESTMethod;
 import beans.CleaningRobotData;
+import beans.RobotListResponse;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.sun.jersey.api.client.Client;
@@ -12,6 +14,8 @@ import java.util.Scanner;
 
 public class AdministratorClient {
 
+    private static final Client CLIENT = Client.create();
+
     private static void printOptions() {
         System.out.println("---------------------------------------------------------------------------------------------------------------");
         System.out.println("|  Welcome in Greenfield!!                                                                                     |");
@@ -24,39 +28,48 @@ public class AdministratorClient {
         System.out.println("---------------------------------------------------------------------------------------------------------------");
     }
 
-    private static ClientResponse showCurrentListCleaningRobot(Client client, String serverAddress) {
-        WebResource webResource = client.resource(serverAddress + "/adminClient/getRobots");
-        try {
-            return webResource.type("application/json").get(ClientResponse.class);
-        } catch (ClientHandlerException e) {
-            System.out.println("Server not available");
-            return null;
+    private static void getRobotList(ClientResponse clientResponse) {
+        clientResponse = RESTMethod.showCurrentListCleaningRobot(CLIENT);
+        System.out.println(clientResponse.toString());
+        RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
+        System.out.println("these are the ids of the cleaning robots currently in greenfield");
+        for (CleaningRobotData c : robots.getRobots()) {
+            System.out.println("ID: " + c.getId() + " DISCRICT: " + (c.getDistrict()));
+        }
+        if (robots.getRobots().isEmpty()) {
+            System.out.println("There are no robots in Greenfield, come back later");
         }
     }
 
-    private static ClientResponse getLastNAveragePollutionLevelOfRobot(Client client, String serverAddress, String id, int value) {
-        WebResource webResource = client.resource(serverAddress + "/adminClient/last_n_avg_pollution/"+ id + "/" + String.valueOf(value));
-        try {
-            return webResource.type("application/json").get(ClientResponse.class);
-        } catch (ClientHandlerException e) {
-            System.out.println("Server not available");
-            return null;
-        }
+    private static void getAverageFromRobot(ClientResponse clientResponse) {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Type the robot id:");
+        System.out.print("> ");
+        String id = in.next();
+        System.out.println("Type the number of pollution levels:");
+        System.out.print("> ");
+        int value = in.nextInt();
+        clientResponse = RESTMethod.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
+        System.out.println(clientResponse.toString());
+        String average = clientResponse.getEntity(String.class);
+        System.out.println("The average of the last " + value + " air pollution levels measured by the robot with id " + id + " is: " + average);
     }
 
-    private static ClientResponse getAverageAirPollutionLevelsFromTimestamp(Client client, String serverAddress, Long t1, Long t2) {
-        WebResource webResource = client.resource(serverAddress + "/adminClient/average_pollution_level/"+ t1 + "/" + t2);
-        try {
-            return webResource.type("application&/json").get(ClientResponse.class);
-            } catch (ClientHandlerException e) {
-            System.out.println("Server not available");
-            return null;
-        }
+    private static void getAverageFromT1ToT2(ClientResponse clientResponse) {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Digit the first timestamp:");
+        System.out.print("> ");
+        Long t1 = Long.parseLong(in.next());
+        System.out.println("Digit the second timestamp:");
+        System.out.print("> ");
+        Long t2 = Long.parseLong(in.next());
+        clientResponse = RESTMethod.getAverageAirPollutionLevelsFromTimestamp(CLIENT, t1, t2);
+        System.out.println(clientResponse.toString());
+        String averageFromT1ToT2 = clientResponse.getEntity(String.class);
+        System.out.println("The average of air pollution levels measured between the interval " + t1 + " and the interval " + t2 +" is: " + averageFromT1ToT2);
     }
 
     public static void main(String[] args) {
-        Client client = Client.create();
-        String serverAddress = "http://localhost:1337";
         ClientResponse clientResponse = null;
 
         printOptions();
@@ -70,49 +83,17 @@ public class AdministratorClient {
                 case "0":
                     break label;
                 case "1":
-                    clientResponse = showCurrentListCleaningRobot(client, serverAddress);
-                    System.out.println(clientResponse.toString());
-                    String robotsJson = clientResponse.getEntity(String.class);
-                    Type listType = new TypeToken<List<CleaningRobotData>>() {
-                    }.getType();
-                    List<CleaningRobotData> robots = new Gson().fromJson(robotsJson, listType);
-                    System.out.println("these are the ids of the cleaning robots currently in greenfield");
-                    for (CleaningRobotData c : robots) {
-                        System.out.println("ID: " + c.getId() + " DISCRICT: " + (c.getDistrict()));
-                    }
-                    if (robots.isEmpty()) {
-                        System.out.println("There are no robots in Greenfield, come back later");
-                    }
+                    getRobotList(clientResponse);
                     break;
                 case "2":
-                    System.out.println("Type the robot id:");
-                    System.out.print("> ");
-                    String id = in.next();
-                    System.out.println("Type the number of pollution levels:");
-                    System.out.print("> ");
-                    int value = in.nextInt();
-                    clientResponse = getLastNAveragePollutionLevelOfRobot(client, serverAddress, id, value);
-                    System.out.println(clientResponse.toString());
-                    String average = clientResponse.getEntity(String.class);
-                    System.out.println("The average of the last " + value + " air pollution levels measured by the robot with id " + id + " is: " + average);
+                    getAverageFromRobot(clientResponse);
                     break;
                 case "3":
-                    System.out.println("Digit the first timestamp:");
-                    System.out.print("> ");
-                    Long t1 = Long.parseLong(in.next());
-                    System.out.println("Digit the second timestamp:");
-                    System.out.print("> ");
-                    Long t2 = Long.parseLong(in.next());
-                    clientResponse = getAverageAirPollutionLevelsFromTimestamp(client, serverAddress, t1, t2);
-                    System.out.println(clientResponse.toString());
-                    String averageFromT1ToT2 = clientResponse.getEntity(String.class);
-                    System.out.println("The average of air pollution levels measured between the interval " + t1 + " and the interval " + t2 +" is: " + averageFromT1ToT2);
+                    getAverageFromT1ToT2(clientResponse);
                     break;
                 case "4":
                     printOptions();
                     break;
-
-
                 default:
                     System.out.println("Option not supported");
                     break;

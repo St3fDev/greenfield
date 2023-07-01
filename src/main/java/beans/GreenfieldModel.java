@@ -7,7 +7,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @XmlRootElement
-@XmlAccessorType (XmlAccessType.FIELD)
 public class GreenfieldModel {
 
     private List<CleaningRobotData> robots;
@@ -84,17 +83,21 @@ public class GreenfieldModel {
         return true;
     }
 
-    public void removeRobot(String id) {
+    public boolean removeRobot(String id) {
         CleaningRobotData tempRobot = null;
         for (CleaningRobotData robot : robots) {
             if (robot.getId().equals(id)) {
                 tempRobot = robot;
             }
         }
-        districts[tempRobot.getDistrict()-1] -= 1;
-        synchronized (this.robots) {
-            robots.removeIf((elem) -> elem.getId().equals(id));
+        if (tempRobot != null) {
+            districts[tempRobot.getDistrict()-1] -= 1;
+            synchronized (this.robots) {
+                robots.removeIf((elem) -> elem.getId().equals(id));
+            }
+            return true;
         }
+        return false;
     }
 
     // STATISTICS:

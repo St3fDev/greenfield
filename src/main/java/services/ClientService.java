@@ -1,5 +1,6 @@
 package services;
 
+import beans.RobotListResponse;
 import beans.GreenfieldModel;
 import com.google.gson.Gson;
 
@@ -17,7 +18,7 @@ public class ClientService {
     @GET
     @Produces({"application/json", "application/xml"})
     public Response getAllRobots() {
-        String robots = new Gson().toJson(GreenfieldModel.getInstance().getRobots());
+        String robots = new Gson().toJson(new RobotListResponse(GreenfieldModel.getInstance().getRobots()));
         return Response.ok(robots).build();
     }
 
