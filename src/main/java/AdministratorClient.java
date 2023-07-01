@@ -1,15 +1,9 @@
-import Robot.RESTMethod;
-import beans.CleaningRobotData;
-import beans.RobotListResponse;
-import com.google.common.reflect.TypeToken;
-import com.google.gson.Gson;
+import common.RESTMethods;
+import common.CleaningRobotData;
+import common.RobotListResponse;
 import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 
-import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Scanner;
 
 public class AdministratorClient {
@@ -29,7 +23,7 @@ public class AdministratorClient {
     }
 
     private static void getRobotList(ClientResponse clientResponse) {
-        clientResponse = RESTMethod.showCurrentListCleaningRobot(CLIENT);
+        clientResponse = RESTMethods.showCurrentListCleaningRobot(CLIENT);
         System.out.println(clientResponse.toString());
         RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
         System.out.println("these are the ids of the cleaning robots currently in greenfield");
@@ -49,7 +43,7 @@ public class AdministratorClient {
         System.out.println("Type the number of pollution levels:");
         System.out.print("> ");
         int value = in.nextInt();
-        clientResponse = RESTMethod.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
+        clientResponse = RESTMethods.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
         System.out.println(clientResponse.toString());
         String average = clientResponse.getEntity(String.class);
         System.out.println("The average of the last " + value + " air pollution levels measured by the robot with id " + id + " is: " + average);
@@ -63,7 +57,7 @@ public class AdministratorClient {
         System.out.println("Digit the second timestamp:");
         System.out.print("> ");
         Long t2 = Long.parseLong(in.next());
-        clientResponse = RESTMethod.getAverageAirPollutionLevelsFromTimestamp(CLIENT, t1, t2);
+        clientResponse = RESTMethods.getAverageAirPollutionLevelsFromTimestamp(CLIENT, t1, t2);
         System.out.println(clientResponse.toString());
         String averageFromT1ToT2 = clientResponse.getEntity(String.class);
         System.out.println("The average of air pollution levels measured between the interval " + t1 + " and the interval " + t2 +" is: " + averageFromT1ToT2);

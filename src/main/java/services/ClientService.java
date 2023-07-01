@@ -1,7 +1,7 @@
 package services;
 
-import beans.RobotListResponse;
-import beans.GreenfieldModel;
+import common.RobotListResponse;
+import server.beans.GreenfieldModel;
 import com.google.gson.Gson;
 
 import javax.ws.rs.GET;

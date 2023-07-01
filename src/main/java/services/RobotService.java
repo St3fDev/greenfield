@@ -1,8 +1,8 @@
 package services;
 
-import beans.CleaningRobotData;
-import beans.GreenfieldDetails;
-import beans.GreenfieldModel;
+import common.CleaningRobotData;
+import server.beans.GreenfieldDetails;
+import server.beans.GreenfieldModel;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
