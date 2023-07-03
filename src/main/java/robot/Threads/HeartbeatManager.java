@@ -1,13 +1,13 @@
 package robot.Threads;
 
+import common.CleaningRobotData;
+import common.RESTMethods;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
-import common.CleaningRobotData;
 import robot.beans.CleaningRobotDetails;
-import common.RESTMethods;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +16,7 @@ public class HeartbeatManager extends Thread{
 
     private volatile boolean stopCondition = false;
     public HeartbeatManager() {
-        setName("HeartbeatThread");
+        setName("HeartbeatManager");
     }
 
     @Override
@@ -38,6 +38,7 @@ public class HeartbeatManager extends Thread{
                 throw new RuntimeException(e);
             }
             List<CleaningRobotData> snapshotRobot = CleaningRobotDetails.getInstance().getRobots();
+            final boolean[] isCrashed = {false};
             RobotServiceOuterClass.Empty request = RobotServiceOuterClass.Empty.newBuilder().build();
             for (CleaningRobotData otherRobot : snapshotRobot) {
                 Thread thread = new Thread(() -> {
@@ -52,9 +53,8 @@ public class HeartbeatManager extends Thread{
 
                         @Override
                         public void onError(Throwable t) {
+                            isCrashed[0] = true;
                             System.out.println("[" + getName() + "] " +"Removed robot " + otherRobot.getId() + " because it was unreachable");
-                            RESTMethods.deleteRequest(otherRobot.getId());
-                            CleaningRobotDetails.getInstance().getRobots().removeIf((elem) -> elem.getId().equals(otherRobot.getId()));
                             channel.shutdownNow();
                         }
 
@@ -68,11 +68,17 @@ public class HeartbeatManager extends Thread{
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
+                    if (isCrashed[0]) {
+                        System.out.println("In removing...");
+                        RESTMethods.deleteRequest(otherRobot.getId());
+                        CleaningRobotDetails.getInstance().removeRobot(otherRobot.getId());
+                        isCrashed[0] = false;
+                    }
                 });
                 thread.start();
             }
         }
-        System.out.println("---------------- HEARTBEAT THREAD CLOSED -----------------");
+        System.out.println("---------------- HEARTBEAT MANAGER CLOSED ---------------");
     }
 
     public void stopMeGently() {

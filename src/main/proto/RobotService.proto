@@ -11,14 +11,7 @@ message RobotPresentation {
 }
 
 message RobotResponse {
-
   required string id = 1;
-  required Status status = 2;
-}
-
-enum Status {
-  OK = 0;
-  ERR = 1;
 }
 
 message Position {

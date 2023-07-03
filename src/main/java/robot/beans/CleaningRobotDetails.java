@@ -10,12 +10,12 @@ public class CleaningRobotDetails {
 
     private List<CleaningRobotData> robots = new ArrayList<>();
     private List<Statistic> averages = new ArrayList<>();
-    private boolean isInMaintenance;
-    private final Object sizeListLock = new Object();
-    private final Object lock = new Object();
     private CleaningRobotData robotInfo;
+    private boolean isInMaintenance;
     private volatile boolean waitingForMaintenance;
     private long timestamp;
+    private final Object sizeListLock = new Object();
+    private final Object lock = new Object();
 
     public boolean isWaitingForMaintenance() {
         return waitingForMaintenance;

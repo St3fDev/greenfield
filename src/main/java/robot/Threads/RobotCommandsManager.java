@@ -1,26 +1,26 @@
 package robot.Threads;
 
-import robot.MQTT.RobotMqttPublisher;
+import common.CleaningRobotData;
+import common.RESTMethods;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
-import common.CleaningRobotData;
+import robot.MQTT.RobotMqttPublisher;
 import robot.beans.CleaningRobotDetails;
 import robot.simulators.PM10Simulator;
-import common.RESTMethods;
 
 import java.util.List;
 import java.util.Scanner;
 
-public class RobotInputManager extends Thread {
+public class RobotCommandsManager extends Thread {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
     MalfunctionManager mt;
 
     List<Thread> threadsToStop;
 
-    public RobotInputManager(List<Thread> threadsToStop) {
+    public RobotCommandsManager(List<Thread> threadsToStop) {
         this.threadsToStop = threadsToStop;
         mt = new MalfunctionManager();
         setName("RobotInputThread");

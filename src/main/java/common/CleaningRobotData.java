@@ -1,7 +1,5 @@
 package common;
 
-import common.Position;
-
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -58,4 +56,12 @@ public class CleaningRobotData {
         this.position = position;
     }
 
+    @Override
+    public String toString() {
+        return "ROBOT: " + getId()
+                + " POSITION: [" + getPosition().getX() + "," + getPosition().getY() + "]"
+                + " DISTRICT: " + getDistrict();
+    }
+
 }
+

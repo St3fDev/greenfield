@@ -1,14 +1,14 @@
 package robot.Threads;
 
 import robot.beans.BufferImpl;
-import server.beans.Statistic;
 import robot.beans.CleaningRobotDetails;
 import robot.simulators.Measurement;
+import server.beans.Statistic;
 
 import java.util.List;
 
 public class PM10Consumer extends Thread {
-    private BufferImpl buffer;
+    private final BufferImpl buffer;
 
     public PM10Consumer(BufferImpl buffer) {
         this.buffer = buffer;
@@ -35,7 +35,7 @@ public class PM10Consumer extends Thread {
                 CleaningRobotDetails.getInstance().addStatistic(calculateAverage(measurementToProcess));
             }
         }
-        System.out.println("---------------- PM10 CONSUMER CLOSED -----------------");
+        System.out.println("----------------- PM10 CONSUMER CLOSED ------------------");
     }
 
     private Statistic calculateAverage(List<Measurement> measurements) {

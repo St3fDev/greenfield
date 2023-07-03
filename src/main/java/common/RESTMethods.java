@@ -16,7 +16,7 @@ public class RESTMethods {
         String postPath = SERVER_ADDRESS + "/robots/addRobot";
         WebResource webResource = client.resource(postPath);
         String input = new Gson().toJson(CleaningRobotDetails.getInstance().getRobotInfo());
-        System.out.println(input);
+        //System.out.println(input);
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {
@@ -48,7 +48,7 @@ public class RESTMethods {
     }
 
     public static ClientResponse getLastNAveragePollutionLevelOfRobot(Client client, String id, int value) {
-        WebResource webResource = client.resource(SERVER_ADDRESS + "/adminClient/last_n_avg_pollution/"+ id + "/" + String.valueOf(value));
+        WebResource webResource = client.resource(SERVER_ADDRESS + "/adminClient/last_n_avg_pollution/"+ id + "/" + value);
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {

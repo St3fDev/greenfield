@@ -1,7 +1,7 @@
 package server.beans;
 
-import common.Position;
 import common.CleaningRobotData;
+import common.Position;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -61,11 +61,11 @@ public class GreenfieldModel {
             case 2:
                 districts[2] += 1;
                 cleaningRobot.setDistrict(3);
-                return new Position(rand.nextInt(5) + 5, rand.nextInt(5));
+                return new Position(rand.nextInt(5)+5, rand.nextInt(5)+5);
             case 3:
                 districts[3] += 1;
                 cleaningRobot.setDistrict(4);
-                return new Position(rand.nextInt(5)+5, rand.nextInt(5)+5);
+                return new Position(rand.nextInt(5) + 5, rand.nextInt(5));
         }
         return null;
     }

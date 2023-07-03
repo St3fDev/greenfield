@@ -1,11 +1,11 @@
 package robot.Threads;
 
+import common.CleaningRobotData;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
-import common.CleaningRobotData;
 import robot.beans.CleaningRobotDetails;
 import robot.utils.SimpleLatch;
 
@@ -21,6 +21,8 @@ public class MalfunctionManager extends Thread {
     private volatile boolean stopCondition = false;
 
     public MalfunctionManager() {
+
+        setName("MalfunctionManager");
         this.random = new Random();
     }
 
@@ -45,7 +47,7 @@ public class MalfunctionManager extends Thread {
                 break;
             }
         }
-        System.out.println("---------------- MALFUNCTION THREAD CLOSED -----------------");
+        System.out.println("--------------- MALFUNCTION MANAGER CLOSED --------------");
     }
 
     public static void handleMalfunction(List<CleaningRobotData> robotSnapshot) throws InterruptedException {

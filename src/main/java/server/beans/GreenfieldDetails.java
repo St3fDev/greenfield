@@ -1,7 +1,7 @@
 package server.beans;
 
-import common.Position;
 import common.CleaningRobotData;
+import common.Position;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;

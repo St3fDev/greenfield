@@ -1,10 +1,10 @@
 package server.MQTT;
 
-import server.beans.GreenfieldModel;
-import server.beans.PollutionData;
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import org.eclipse.paho.client.mqttv3.*;
+import server.beans.GreenfieldModel;
+import server.beans.PollutionData;
 
 import java.sql.Timestamp;
 import java.util.Scanner;

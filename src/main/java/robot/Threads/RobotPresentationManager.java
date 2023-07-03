@@ -1,13 +1,13 @@
 package robot.Threads;
 
+import common.CleaningRobotData;
+import common.RESTMethods;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
-import common.CleaningRobotData;
 import robot.beans.CleaningRobotDetails;
-import common.RESTMethods;
 
 import java.util.concurrent.TimeUnit;
 
@@ -39,7 +39,7 @@ public class RobotPresentationManager extends Thread{
         stub.presentation(request, new StreamObserver<RobotServiceOuterClass.RobotResponse>() {
             @Override
             public void onNext(RobotServiceOuterClass.RobotResponse robotResponse) {
-                System.out.println("I'm robot: " + robotResponse.getId() +" -> " + robotResponse.getStatus());
+                System.out.println("Welcome from robot: " + robotResponse.getId());
             }
 
             @Override

@@ -1,8 +1,8 @@
 package robot.GRPC;
 
-import robot.beans.CleaningRobotDetails;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
+import robot.beans.CleaningRobotDetails;
 
 import java.io.IOException;
 

@@ -1,6 +1,5 @@
 package robot.GRPC;
 
-import robot.beans.CleaningRobotDetails;
 import common.CleaningRobotData;
 import common.Position;
 import io.grpc.stub.StreamObserver;
@@ -8,7 +7,7 @@ import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
 import it.robot.grpc.RobotServiceOuterClass.RobotPresentation;
 import it.robot.grpc.RobotServiceOuterClass.RobotResponse;
-import it.robot.grpc.RobotServiceOuterClass.Status;
+import robot.beans.CleaningRobotDetails;
 
 public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
 
@@ -19,7 +18,6 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
     public void presentation(RobotPresentation request, StreamObserver<RobotResponse> responseObserver) {
         RobotResponse robotResponse = RobotResponse.newBuilder()
                 .setId(CleaningRobotDetails.getInstance().getRobotInfo().getId())
-                .setStatus(Status.OK)
                 .build();
         responseObserver.onNext(robotResponse);
         responseObserver.onCompleted();
