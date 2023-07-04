@@ -118,6 +118,9 @@ public class GreenfieldModel {
     public Double avgLastNAirPollutionLevel(String id, int n) {
         List<Statistic> statistics;
         synchronized (this.robotStatistics) {
+            if(!robotStatistics.containsKey(id)) {
+                return 0.0;
+            }
             statistics = new ArrayList<>(robotStatistics.get(id));
         }
         List<Double> averages = statistics.stream()

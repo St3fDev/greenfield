@@ -3,6 +3,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
 import common.RobotListResponse;
+import robot.Threads.IOManager;
 
 import java.util.Scanner;
 
@@ -10,35 +11,17 @@ public class AdministratorClient {
 
     private static final Client CLIENT = Client.create();
 
-    private static void printOptions() {
-        System.out.println(" ________  ________  _______   _______   ________   ________ ___  _______   ___       ________");
-        System.out.println("|\\   ____\\|\\   __  \\|\\  ___ \\ |\\  ___ \\ |\\   ___  \\|\\  _____\\\\  \\|\\  ___ \\ |\\  \\     |\\   ___ \\");
-        System.out.println("\\ \\  \\  __\\ \\   _  _\\ \\  \\_|/_\\ \\  \\_|/_\\ \\  \\\\ \\  \\ \\   __\\\\ \\  \\ \\  \\_|/_\\ \\  \\    \\ \\  \\ \\\\ \\");
-        System.out.println(" \\ \\  \\|\\  \\ \\  \\\\  \\\\ \\  \\_|\\ \\ \\  \\_|\\ \\ \\  \\\\ \\  \\ \\  \\_| \\ \\  \\ \\  \\_|\\ \\ \\  \\____\\ \\  \\_\\\\ \\");
-        System.out.println("  \\ \\_______\\ \\__\\\\ _\\\\ \\_______\\ \\_______\\ \\__\\\\ \\__\\ \\__\\   \\ \\__\\ \\_______\\ \\_______\\ \\_______\\");
-        System.out.println("   \\|_______|\\|__|\\|__|\\|_______|\\|_______|\\|__| \\|__|\\|__|    \\|__|\\|_______|\\|_______|\\|_______|");
-        System.out.println();
-        System.out.println("-------------------------------------------------------------------------------------------------------------------");
-        System.out.println("|  Welcome in Greenfield!!                                                                                        |");
-        System.out.println("|  Digit a number to get the following information:                                                               |");
-        System.out.println("|  [1]: shows the list of cleaning robots in Greenfield                                                           |");
-        System.out.println("|  [2]: shows the average of the last n air pollution levels measured by a given cleaning robot                   |");
-        System.out.println("|  [3]: shows the average of air pollution levels measured between two times                                      |");
-        System.out.println("|  [4]: shows all available options                                                                               |");
-        System.out.println("|  [0]: quit this program                                                                                         |");
-        System.out.println("-------------------------------------------------------------------------------------------------------------------");
-    }
-
     private static void getRobotList() {
         ClientResponse clientResponse = RESTMethods.showCurrentListCleaningRobot(CLIENT);
         System.out.println(clientResponse.toString());
-        RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
-        System.out.println("these are the ids of the cleaning robots currently in greenfield");
-        for (CleaningRobotData c : robots.getRobots()) {
-            System.out.println("ID: " + c.getId() + " DISCRICT: " + (c.getDistrict()));
-        }
-        if (robots.getRobots().isEmpty()) {
-            System.out.println("There are no robots in Greenfield, come back later");
+        if (clientResponse.getStatus() == 200) {
+            RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
+            System.out.println("Robot currently in the greenfield:");
+            for (CleaningRobotData c : robots.getRobots()) {
+                IOManager.printRobot(c);
+            }
+        } else {
+            System.out.println(clientResponse.getEntity(String.class));
         }
     }
 
@@ -47,13 +30,28 @@ public class AdministratorClient {
         System.out.println("Type the robot id:");
         System.out.print("> ");
         String id = in.next();
-        System.out.println("Type the number of pollution levels:");
-        System.out.print("> ");
-        int value = in.nextInt();
+        int value = 0;
+        boolean validInput = false;
+
+        while (!validInput) {
+            System.out.println("Type the number of pollution levels:");
+            System.out.print("> ");
+            if (in.hasNextInt()) {
+                value = in.nextInt();
+                validInput = true;
+            } else {
+                System.out.println("Invalid input. Please enter a valid number.");
+                in.next(); // Consumes the invalid input
+            }
+        }
         ClientResponse clientResponse = RESTMethods.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
         System.out.println(clientResponse.toString());
-        String average = clientResponse.getEntity(String.class);
-        System.out.println("The average of the last " + value + " air pollution levels measured by the robot with id " + id + " is: " + average);
+        if (clientResponse.getStatus() == 200) {
+            String average = clientResponse.getEntity(String.class);
+            System.out.println("The average of the last " + value + " air pollution levels measured by the robot [" + id + "] is: " + average);
+        } else {
+            System.out.println(clientResponse.getEntity(String.class));
+        }
     }
 
     private static void getAverageFromT1ToT2() {
@@ -66,13 +64,17 @@ public class AdministratorClient {
         Long t2 = Long.parseLong(in.next());
         ClientResponse clientResponse = RESTMethods.getAverageAirPollutionLevelsFromTimestamp(CLIENT, t1, t2);
         System.out.println(clientResponse.toString());
-        String averageFromT1ToT2 = clientResponse.getEntity(String.class);
-        System.out.println("The average of air pollution levels measured between the interval " + t1 + " and the interval " + t2 +" is: " + averageFromT1ToT2);
+        if (clientResponse.getStatus() == 200) {
+            String averageFromT1ToT2 = clientResponse.getEntity(String.class);
+            System.out.println("The average of air pollution levels measured between " + t1 + " and " + t2 + " is: " + averageFromT1ToT2);
+        } else {
+            System.out.println(clientResponse.getEntity(String.class));
+        }
     }
 
     public static void main(String[] args) {
 
-        printOptions();
+        IOManager.printOptions();
 
         Scanner in = new Scanner(System.in);
         label:
@@ -92,12 +94,12 @@ public class AdministratorClient {
                     getAverageFromT1ToT2();
                     break;
                 case "4":
-                    printOptions();
+                    IOManager.printOptions();
                     break;
                 default:
                     System.out.println("Option not supported");
                     break;
             }
-        } while(true);
+        } while (true);
     }
 }

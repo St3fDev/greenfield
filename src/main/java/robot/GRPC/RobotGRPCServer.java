@@ -5,16 +5,29 @@ import io.grpc.ServerBuilder;
 import robot.beans.CleaningRobotDetails;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class RobotGRPCServer{
 
     public RobotGRPCServer(){}
 
+    private static Server server = null;
     // TODO gestire chiusura server gRPC
     public static void startGRPCServer() throws IOException {
         //Starting the GRPC server for
-            Server server = ServerBuilder.forPort(CleaningRobotDetails.getInstance().getRobotInfo().getPort()).addService(new RobotServiceImpl()).build();
+            server = ServerBuilder.forPort(CleaningRobotDetails.getInstance().getRobotInfo().getPort()).addService(new RobotServiceImpl()).build();
             server.start();
             System.out.println("> GRPC Server started!");
+
+    }
+
+    public static void stopMeGently() {
+        server.shutdown();
+        try {
+            server.awaitTermination(15, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        server.shutdownNow();
     }
 }

@@ -9,6 +9,7 @@ import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
 import robot.beans.CleaningRobotDetails;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -33,28 +34,31 @@ public class HeartbeatManager extends Thread{
             }
             if (stopCondition) break;
             try {
-                Thread.sleep(20000);
+                Thread.sleep(3000);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
             List<CleaningRobotData> snapshotRobot = CleaningRobotDetails.getInstance().getRobots();
-            final boolean[] isCrashed = {false};
             RobotServiceOuterClass.Empty request = RobotServiceOuterClass.Empty.newBuilder().build();
+            List<Thread> pool = new ArrayList<>();
+            System.out.println("LANCIO I CAZZO DI THREAD");
             for (CleaningRobotData otherRobot : snapshotRobot) {
                 Thread thread = new Thread(() -> {
                     ManagedChannel channel = ManagedChannelBuilder.forTarget(otherRobot.getAddress() + ":" + otherRobot.getPort()).usePlaintext(true).build();
                     RobotServiceGrpc.RobotServiceStub stub = RobotServiceGrpc.newStub(channel);
+
+                    final boolean[] didAnswer = {false};
+
                     stub.heartbeatService(request, new StreamObserver<RobotServiceOuterClass.HeartbeatResponse>(){
 
                         @Override
                         public void onNext(RobotServiceOuterClass.HeartbeatResponse response) {
-                            //System.out.println("Heartbeat received from robot: " + response.getId());
+                            didAnswer[0] = true;
+                            System.out.println("Heartbeat received from robot: " + response.getId());
                         }
 
                         @Override
                         public void onError(Throwable t) {
-                            isCrashed[0] = true;
-                            System.out.println("[" + getName() + "] " +"Removed robot " + otherRobot.getId() + " because it was unreachable");
                             channel.shutdownNow();
                         }
 
@@ -64,18 +68,27 @@ public class HeartbeatManager extends Thread{
                         }
                     });
                     try {
-                        channel.awaitTermination(10, TimeUnit.SECONDS);
+                        channel.awaitTermination(2, TimeUnit.SECONDS);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
-                    if (isCrashed[0]) {
+                    if (!didAnswer[0]) {
+                        System.out.println("[" + getName() + "] " +"Removed robot " + otherRobot.getId() + " because it was unreachable");
                         System.out.println("In removing...");
                         RESTMethods.deleteRequest(otherRobot.getId());
                         CleaningRobotDetails.getInstance().removeRobot(otherRobot.getId());
-                        isCrashed[0] = false;
+                        didAnswer[0] = false;
                     }
                 });
+                pool.add(thread);
                 thread.start();
+            }
+            for (Thread t: pool) {
+                try {
+                    t.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         System.out.println("---------------- HEARTBEAT MANAGER CLOSED ---------------");

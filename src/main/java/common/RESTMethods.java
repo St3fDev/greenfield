@@ -20,7 +20,7 @@ public class RESTMethods {
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {
-            System.out.println("Server unavailable");
+            System.out.println("Server not reachable");
             return null;
         }
     }
@@ -32,7 +32,7 @@ public class RESTMethods {
         try {
             webResource.type("application/json").delete(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server unavailable");
+            System.out.println("Server not reachable");
         }
     }
 
@@ -42,7 +42,7 @@ public class RESTMethods {
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not available");
+            System.out.println("Server not reachable");
             return null;
         }
     }
@@ -52,7 +52,7 @@ public class RESTMethods {
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not available");
+            System.out.println("Server not reachable");
             return null;
         }
     }
@@ -62,7 +62,7 @@ public class RESTMethods {
         try {
             return webResource.type("application&/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not available");
+            System.out.println("Server not reachable");
             return null;
         }
     }

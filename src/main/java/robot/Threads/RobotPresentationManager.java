@@ -56,7 +56,7 @@ public class RobotPresentationManager extends Thread{
             }
         });
         try {
-            channel.awaitTermination(30, TimeUnit.SECONDS);
+            channel.awaitTermination(10, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

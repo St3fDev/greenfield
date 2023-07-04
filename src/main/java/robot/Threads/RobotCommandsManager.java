@@ -4,26 +4,30 @@ import common.CleaningRobotData;
 import common.RESTMethods;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
+import robot.GRPC.RobotGRPCServer;
 import robot.MQTT.RobotMqttPublisher;
 import robot.beans.CleaningRobotDetails;
 import robot.simulators.PM10Simulator;
 
 import java.util.List;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class RobotCommandsManager extends Thread {
     private static final String SERVER_ADDRESS = "http://localhost:1337";
     MalfunctionManager mt;
+    private static Logger log = Logger.getLogger(RobotCommandsManager.class.getName());
 
     List<Thread> threadsToStop;
 
     public RobotCommandsManager(List<Thread> threadsToStop) {
         this.threadsToStop = threadsToStop;
         mt = new MalfunctionManager();
-        setName("RobotInputThread");
+        setName("RobotCommandsManager");
     }
 
     @Override
@@ -57,8 +61,7 @@ public class RobotCommandsManager extends Thread {
             input = scanner.nextLine();
         }
 
-        System.out.println("Removing the robot from Greenfield");
-        RESTMethods.deleteRequest(CleaningRobotDetails.getInstance().getRobotInfo().getId());
+        log.info("Start robot removal process");
         List<CleaningRobotData> snapshotRobot = CleaningRobotDetails.getInstance().getRobots();
         if (snapshotRobot.size() > 0) {
             RobotServiceOuterClass.RobotExitRequest exitRequest = RobotServiceOuterClass.RobotExitRequest.newBuilder().setId(CleaningRobotDetails.getInstance().getRobotInfo().getId()).build();
@@ -112,8 +115,8 @@ public class RobotCommandsManager extends Thread {
                 }
             }
         }
-
-        System.out.println("exit completed!");
-        System.exit(0);
+        RobotGRPCServer.stopMeGently();
+        RESTMethods.deleteRequest(CleaningRobotDetails.getInstance().getRobotInfo().getId());
+        log.info("EXIT COMPLETED!");
     }
 }

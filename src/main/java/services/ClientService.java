@@ -18,8 +18,13 @@ public class ClientService {
     @GET
     @Produces({"application/json", "application/xml"})
     public Response getAllRobots() {
-        String robots = new Gson().toJson(new RobotListResponse(GreenfieldModel.getInstance().getRobots()));
-        return Response.ok(robots).build();
+        if (!GreenfieldModel.getInstance().getRobots().isEmpty()) {
+            String robots = new Gson().toJson(new RobotListResponse(GreenfieldModel.getInstance().getRobots()));
+            return Response.ok(robots).build();
+        }
+        return Response.status(Response.Status.NOT_FOUND)
+                .entity("There are no robot in Greenfield, please come back later.")
+                .build();
     }
 
     @Path("last_n_avg_pollution/{robot_id}/{value}")
@@ -32,7 +37,7 @@ public class ClientService {
             return Response.ok(avg).build();
         }
         else {
-            return Response.status(Response.Status.NOT_FOUND).entity("there is no robot with id: " + id + " in Greenfield").build();
+            return Response.status(Response.Status.NOT_FOUND).entity("This cleaning robot [" + id + "] is not in greenfield").build();
         }
     }
 

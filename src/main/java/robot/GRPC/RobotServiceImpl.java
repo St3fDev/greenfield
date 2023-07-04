@@ -75,6 +75,7 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
                 .setId(CleaningRobotDetails.getInstance().getRobotInfo().getId())
                 .build();
         responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
 

@@ -9,6 +9,7 @@ import it.robot.grpc.RobotServiceOuterClass;
 import robot.beans.CleaningRobotDetails;
 import robot.utils.SimpleLatch;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -59,6 +60,7 @@ public class MalfunctionManager extends Thread {
                     .setId(CleaningRobotDetails.getInstance().getRobotInfo().getId())
                     .setTimestamp(CleaningRobotDetails.getInstance().getTimestamp())
                     .build();
+            List<Thread> pool = new ArrayList<>();
             for (CleaningRobotData otherRobot : robotSnapshot) {
                 Thread thread = new Thread(() -> {
                     //TODO: da rimuovere: utilizzato solo per scopi di debug
@@ -78,6 +80,7 @@ public class MalfunctionManager extends Thread {
                         }
                         @Override
                         public void onError(Throwable t) {
+                            System.out.println("Robot unreachable");
                             latch.countDown();
                         }
                         @Override
@@ -91,12 +94,17 @@ public class MalfunctionManager extends Thread {
                         throw new RuntimeException(e);
                     }
                 });
+                pool.add(thread);
                 thread.start();
             }
             try {
                 latch.await();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+            }
+            for (Thread t:
+                 pool) {
+                t.join();
             }
             occupyMechanic();
         }
