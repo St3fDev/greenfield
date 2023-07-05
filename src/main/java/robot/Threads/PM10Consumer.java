@@ -1,9 +1,9 @@
 package robot.Threads;
 
 import robot.beans.BufferImpl;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 import robot.simulators.Measurement;
-import server.beans.Statistic;
+import common.Statistic;
 
 import java.util.List;
 
@@ -28,11 +28,11 @@ public class PM10Consumer extends Thread {
                     }
                 }
                 List<Measurement> measurementToProcess = buffer.readAllAndClean();
-                //System.out.println("NEL CONSUMER:");
-                /*for(Measurement me : measurements) {
-                System.out.println(me.getValue());
-                 }*/
-                CleaningRobotDetails.getInstance().addStatistic(calculateAverage(measurementToProcess));
+
+                //TODO: per dimostrazione all'esame (per visualizzare se computa solo con 8 misure e se il thread si chiude)
+                //System.out.println(measurementToProcess.size());
+
+                CleaningRobotModel.getInstance().addStatistic(calculateAverage(measurementToProcess));
             }
         }
         System.out.println("----------------- PM10 CONSUMER CLOSED ------------------");

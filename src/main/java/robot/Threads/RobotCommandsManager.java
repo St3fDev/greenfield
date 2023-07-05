@@ -4,17 +4,18 @@ import common.CleaningRobotData;
 import common.RESTMethods;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.Server;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
 import robot.GRPC.RobotGRPCServer;
 import robot.MQTT.RobotMqttPublisher;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 import robot.simulators.PM10Simulator;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class RobotCommandsManager extends Thread {
@@ -46,8 +47,8 @@ public class RobotCommandsManager extends Thread {
             }
             if (input.equalsIgnoreCase("fix")) {
                 try {
-                    List<CleaningRobotData> robotSnapshot = CleaningRobotDetails.getInstance().getRobots();
-                    if (!CleaningRobotDetails.getInstance().isWaitingForMaintenance()) {
+                    List<CleaningRobotData> robotSnapshot = CleaningRobotModel.getInstance().getRobots();
+                    if (!CleaningRobotModel.getInstance().isWaitingForMaintenance()) {
                         MalfunctionManager.handleMalfunction(robotSnapshot);
                     } else {
                         System.out.println("The robot is already requiring access from the mechanic or is already in maintenance");
@@ -62,29 +63,49 @@ public class RobotCommandsManager extends Thread {
         }
 
         log.info("Start robot removal process");
-        List<CleaningRobotData> snapshotRobot = CleaningRobotDetails.getInstance().getRobots();
+        List<CleaningRobotData> snapshotRobot = CleaningRobotModel.getInstance().getRobots();
         if (snapshotRobot.size() > 0) {
-            RobotServiceOuterClass.RobotExitRequest exitRequest = RobotServiceOuterClass.RobotExitRequest.newBuilder().setId(CleaningRobotDetails.getInstance().getRobotInfo().getId()).build();
+            RobotServiceOuterClass.RobotExitRequest exitRequest = RobotServiceOuterClass.RobotExitRequest.newBuilder().setId(CleaningRobotModel.getInstance().getRobotInfo().getId()).build();
+            List<Thread> pool = new ArrayList<>();
             for (CleaningRobotData otherRobot : snapshotRobot) {
-                ManagedChannel channel = ManagedChannelBuilder.forTarget(otherRobot.getAddress() + ":" + otherRobot.getPort()).usePlaintext(true).build();
-                RobotServiceGrpc.RobotServiceStub stub = RobotServiceGrpc.newStub(channel);
-                stub.notifyExit(exitRequest, new StreamObserver<RobotServiceOuterClass.RobotExitResponse>() {
+                Thread thread = new Thread(() -> {
+                    ManagedChannel channel = ManagedChannelBuilder.forTarget(otherRobot.getAddress() + ":" + otherRobot.getPort()).usePlaintext(true).build();
+                    RobotServiceGrpc.RobotServiceStub stub = RobotServiceGrpc.newStub(channel);
+                    stub.notifyExit(exitRequest, new StreamObserver<RobotServiceOuterClass.RobotExitResponse>() {
 
-                    @Override
-                    public void onNext(RobotServiceOuterClass.RobotExitResponse response) {
-                        System.out.println("successfully removed from list of the robot: " + response.getId());
-                    }
+                        @Override
+                        public void onNext(RobotServiceOuterClass.RobotExitResponse response) {
+                            System.out.println("successfully removed from list of the robot: " + response.getId());
+                        }
 
-                    @Override
-                    public void onError(Throwable t) {
-                        channel.shutdownNow();
-                    }
+                        @Override
+                        public void onError(Throwable t) {
+                            channel.shutdown();
+                        }
 
-                    @Override
-                    public void onCompleted() {
-                        channel.shutdownNow();
+                        @Override
+                        public void onCompleted() {
+                            channel.shutdown();
+                        }
+                    });
+                    try {
+                        if (!channel.awaitTermination(10, TimeUnit.SECONDS)) {
+                            channel.shutdown();
+                        }
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
                     }
                 });
+                pool.add(thread);
+                thread.start();
+            }
+            for (Thread t :
+                    pool) {
+                try {
+                    t.join();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         shutdown(threadsToStop);
@@ -116,7 +137,7 @@ public class RobotCommandsManager extends Thread {
             }
         }
         RobotGRPCServer.stopMeGently();
-        RESTMethods.deleteRequest(CleaningRobotDetails.getInstance().getRobotInfo().getId());
+        RESTMethods.deleteRequest(CleaningRobotModel.getInstance().getRobotInfo().getId());
         log.info("EXIT COMPLETED!");
     }
 }

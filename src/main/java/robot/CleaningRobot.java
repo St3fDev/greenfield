@@ -4,12 +4,11 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
-import io.grpc.Server;
 import robot.GRPC.RobotGRPCServer;
 import robot.MQTT.RobotMqttPublisher;
 import robot.Threads.*;
 import robot.beans.BufferImpl;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 import robot.simulators.PM10Simulator;
 import server.beans.GreenfieldDetails;
 
@@ -31,7 +30,7 @@ public class CleaningRobot {
 
         CleaningRobotData cleaningRobot = new CleaningRobotData(ID, robotAddress, robotPort);
 
-        CleaningRobotDetails.getInstance().setRobotInfo(cleaningRobot);
+        CleaningRobotModel.getInstance().setRobotInfo(cleaningRobot);
         clientResponse = RESTMethods.postRequest(client);
         //System.out.println(clientResponse.toString());
 
@@ -39,16 +38,16 @@ public class CleaningRobot {
             GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
             cleaningRobot.setPosition(details.getPosition());
             if (details.getRobots() != null)
-                CleaningRobotDetails.getInstance().setRobots(details.getRobots());
+                CleaningRobotModel.getInstance().addRobotList(details.getRobots());
             cleaningRobot.setDistrict(details.getDistrict());
             IOManager.printRobot(cleaningRobot);
 
             RobotGRPCServer.startGRPCServer();
 
-            if (CleaningRobotDetails.getInstance().getRobots().size() > 0) {
+            if (CleaningRobotModel.getInstance().getRobots().size() > 0) {
                 log.info("PRESENTATION STARTED");
                 List<RobotPresentationManager> presentationThreads = new ArrayList<>();
-                for (CleaningRobotData robotToPresent : CleaningRobotDetails.getInstance().getRobots()) {
+                for (CleaningRobotData robotToPresent : CleaningRobotModel.getInstance().getRobots()) {
                     RobotPresentationManager presentation = new RobotPresentationManager(cleaningRobot, robotToPresent);
                     presentationThreads.add(presentation);
                     presentation.start();
@@ -63,21 +62,21 @@ public class CleaningRobot {
                 }
                 log.info("PRESENTATION ENDED");
             }
-            RobotMqttPublisher sensorPublisher = new RobotMqttPublisher();
-            sensorPublisher.start();
-            threadsToStop.add(sensorPublisher);
-
-            MalfunctionManager robotProblems = new MalfunctionManager();
+            /*MalfunctionManager robotProblems = new MalfunctionManager();
             robotProblems.start();
-            threadsToStop.add(robotProblems);
+            threadsToStop.add(robotProblems);*/
 
-            BufferImpl buffer = new BufferImpl();
+            /*BufferImpl buffer = new BufferImpl();
             PM10Simulator simulator = new PM10Simulator(buffer);
             PM10Consumer consumer = new PM10Consumer(buffer);
             simulator.start();
             consumer.start();
             threadsToStop.add(simulator);
             threadsToStop.add(consumer);
+
+            RobotMqttPublisher sensorPublisher = new RobotMqttPublisher();
+            sensorPublisher.start();
+            threadsToStop.add(sensorPublisher);*/
 
             HeartbeatManager hbRobot = new HeartbeatManager();
             hbRobot.start();

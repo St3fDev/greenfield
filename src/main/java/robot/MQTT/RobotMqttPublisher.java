@@ -5,7 +5,7 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 import server.beans.PollutionData;
 
 public class RobotMqttPublisher extends Thread {
@@ -18,7 +18,7 @@ public class RobotMqttPublisher extends Thread {
     private volatile boolean stopCondition = false;
 
     public RobotMqttPublisher() {
-        topic = "greenfield/pollution/district" + CleaningRobotDetails.getInstance().getRobotInfo().getDistrict();
+        topic = "greenfield/pollution/district" + CleaningRobotModel.getInstance().getRobotInfo().getDistrict();
     }
 
     @Override
@@ -29,19 +29,20 @@ public class RobotMqttPublisher extends Thread {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            synchronized (CleaningRobotDetails.getInstance().getLock()) {
-                while (CleaningRobotDetails.getInstance().isWaitingForMaintenance()) {
+            synchronized (CleaningRobotModel.getInstance().getLock()) {
+                while (CleaningRobotModel.getInstance().isWaitingForMaintenance()) {
                     try {
-                        CleaningRobotDetails.getInstance().getLock().wait();
+                        CleaningRobotModel.getInstance().getLock().wait();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
-            PollutionData data = new PollutionData(CleaningRobotDetails.getInstance().getRobotInfo().getId(), CleaningRobotDetails.getInstance().getAverages(), System.currentTimeMillis());
 
+            //TODO: per dimostrazione all'esame (la coerenza delle medie prodotte)
+            //System.out.println(CleaningRobotDetails.getInstance().getAverages().stream().map(Statistic::getAverage).reduce(0.0,Double::sum) / CleaningRobotDetails.getInstance().getAverages().size());
+            PollutionData data = new PollutionData(CleaningRobotModel.getInstance().getRobotInfo().getId(), CleaningRobotModel.getInstance().getAverages(), System.currentTimeMillis());
             String payload = new Gson().toJson(data);
-
             try {
                 MqttClient clientMqtt = new MqttClient(BROKER, ID);
                 MqttConnectOptions connOpts = new MqttConnectOptions();
@@ -54,7 +55,7 @@ public class RobotMqttPublisher extends Thread {
 
                 // Si genera il messaggio.
                 MqttMessage message = new MqttMessage(payload.getBytes());
-                CleaningRobotDetails.getInstance().clearLastAvg();
+                CleaningRobotModel.getInstance().clearLastAvg();
                 // Si definisce il QoS.
                 message.setQos(QOS);
                 System.out.printf("(%s) publication of the new message: %s...\n", ID, payload);

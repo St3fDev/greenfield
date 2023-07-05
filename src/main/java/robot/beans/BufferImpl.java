@@ -42,4 +42,3 @@ public class BufferImpl implements Buffer {
     }
 
 }
-// TODO aggiungere sincronizzazione?

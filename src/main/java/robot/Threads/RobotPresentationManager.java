@@ -7,7 +7,7 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 
 import java.util.concurrent.TimeUnit;
 
@@ -46,17 +46,19 @@ public class RobotPresentationManager extends Thread{
             public void onError(Throwable t) {
                 System.out.println("Removed robot " + destinationRobot.getId() + " because it was unreachable");
                 RESTMethods.deleteRequest(destinationRobot.getId());
-                CleaningRobotDetails.getInstance().getRobots().removeIf((elem) -> elem.getId().equals(destinationRobot.getId()));
-                channel.shutdownNow();
+                CleaningRobotModel.getInstance().getRobots().removeIf((elem) -> elem.getId().equals(destinationRobot.getId()));
+                channel.shutdown();
             }
 
             @Override
             public void onCompleted() {
-                channel.shutdownNow();
+                channel.shutdown();
             }
         });
         try {
-            channel.awaitTermination(10, TimeUnit.SECONDS);
+            if (!channel.awaitTermination(10, TimeUnit.SECONDS)) {
+                channel.shutdown();
+            }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

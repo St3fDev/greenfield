@@ -2,6 +2,7 @@ package server.beans;
 
 import common.CleaningRobotData;
 import common.Position;
+import common.Statistic;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -9,8 +10,8 @@ import java.util.stream.Collectors;
 
 public class GreenfieldModel {
 
-    private List<CleaningRobotData> robots;
-    private Map<String,List<Statistic>> robotStatistics;
+    private final List<CleaningRobotData> robots;
+    private final Map<String,List<Statistic>> robotStatistics;
     private final int[] districts;
 
     private GreenfieldModel() {
@@ -26,14 +27,21 @@ public class GreenfieldModel {
         return instance;
     }
 
-    private synchronized List<String> getIds() {
-        return robots.stream().map(CleaningRobotData::getId).collect(Collectors.toList());
+    private List<String> getIds() {
+        List<CleaningRobotData> robotsTemp;
+        synchronized (robots) {
+            robotsTemp = new ArrayList<>(robots);
+        }
+        return robotsTemp.stream().map(CleaningRobotData::getId).collect(Collectors.toList());
     }
 
-    public synchronized void setRobots(List<CleaningRobotData> robots) {
-        this.robots = robots;
+    private List<String> getFullHosts() {
+        List<CleaningRobotData> robotsTemp;
+        synchronized (robots) {
+            robotsTemp = new ArrayList<>(robots);
+        }
+        return robotsTemp.stream().map((e) -> e.getAddress() + e.getPort()).collect(Collectors.toList());
     }
-
 
     private int MinNumberOfCleaningRobotPerDistrict() {
         int minIndex = 0;
@@ -71,7 +79,7 @@ public class GreenfieldModel {
     }
     // HANDLE ROBOTS:
     public boolean addRobot(CleaningRobotData cleaningRobot) {
-        if (getIds().contains(cleaningRobot.getId())) {
+        if (getIds().contains(cleaningRobot.getId()) || getFullHosts().contains(cleaningRobot.getAddress() + cleaningRobot.getPort())) {
             return false;
         }
         int indexOfDistrict = MinNumberOfCleaningRobotPerDistrict();
@@ -93,7 +101,9 @@ public class GreenfieldModel {
             }
         }
         if (tempRobot != null) {
-            districts[tempRobot.getDistrict()-1] -= 1;
+            synchronized (districts) {
+                districts[tempRobot.getDistrict() - 1] -= 1;
+            }
             synchronized (this.robots) {
                 robots.removeIf((elem) -> elem.getId().equals(id));
             }
@@ -102,17 +112,14 @@ public class GreenfieldModel {
         return false;
     }
 
+
     // STATISTICS:
-    public synchronized List<CleaningRobotData> getRobots() {
-        return new ArrayList<>(robots);
-    }
-
-    public synchronized Map<String, List<Statistic>> getRobotStatistics() {
-        return robotStatistics;
-    }
-
-    public synchronized void setRobotStatistics(Map<String, List<Statistic>> robotStatistics) {
-        this.robotStatistics = robotStatistics;
+    public List<CleaningRobotData> getRobots() {
+        List<CleaningRobotData> robotsTemp;
+        synchronized (robots) {
+            robotsTemp = new ArrayList<>(robots);
+        }
+        return new ArrayList<>(robotsTemp);
     }
 
     public Double avgLastNAirPollutionLevel(String id, int n) {
@@ -149,7 +156,9 @@ public class GreenfieldModel {
         List<Statistic> newAverages = average.getPollutionAverages();
 
         existingAverages.addAll(newAverages);
-        robotStatistics.put(robotId, existingAverages);
+        synchronized (this.robotStatistics) {
+            robotStatistics.put(robotId, existingAverages);
+        }
     }
 
 }

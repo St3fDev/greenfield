@@ -7,14 +7,16 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import it.robot.grpc.RobotServiceGrpc;
 import it.robot.grpc.RobotServiceOuterClass;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Logger;
 
 public class HeartbeatManager extends Thread{
 
+    private static final Logger LOG = Logger.getLogger(HeartbeatManager.class.getName());
     private volatile boolean stopCondition = false;
     public HeartbeatManager() {
         setName("HeartbeatManager");
@@ -23,10 +25,10 @@ public class HeartbeatManager extends Thread{
     @Override
     public void run() {
         while(!stopCondition) {
-            synchronized (CleaningRobotDetails.getInstance().getSizeListLock()) {
-                while(CleaningRobotDetails.getInstance().getRobots().size() < 1 && !stopCondition) {
+            synchronized (CleaningRobotModel.getInstance().getSizeListLock()) {
+                while(CleaningRobotModel.getInstance().getRobots().size() < 1 && !stopCondition) {
                     try {
-                        CleaningRobotDetails.getInstance().getSizeListLock().wait();
+                        CleaningRobotModel.getInstance().getSizeListLock().wait();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -38,10 +40,9 @@ public class HeartbeatManager extends Thread{
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            List<CleaningRobotData> snapshotRobot = CleaningRobotDetails.getInstance().getRobots();
+            List<CleaningRobotData> snapshotRobot = CleaningRobotModel.getInstance().getRobots();
             RobotServiceOuterClass.Empty request = RobotServiceOuterClass.Empty.newBuilder().build();
             List<Thread> pool = new ArrayList<>();
-            System.out.println("LANCIO I CAZZO DI THREAD");
             for (CleaningRobotData otherRobot : snapshotRobot) {
                 Thread thread = new Thread(() -> {
                     ManagedChannel channel = ManagedChannelBuilder.forTarget(otherRobot.getAddress() + ":" + otherRobot.getPort()).usePlaintext(true).build();
@@ -54,29 +55,31 @@ public class HeartbeatManager extends Thread{
                         @Override
                         public void onNext(RobotServiceOuterClass.HeartbeatResponse response) {
                             didAnswer[0] = true;
-                            System.out.println("Heartbeat received from robot: " + response.getId());
+                            //System.out.println("Heartbeat received from robot: " + response.getId());
                         }
 
                         @Override
                         public void onError(Throwable t) {
-                            channel.shutdownNow();
+                            channel.shutdown();
                         }
 
                         @Override
                         public void onCompleted() {
-                            channel.shutdownNow();
+                            channel.shutdown();
                         }
                     });
                     try {
-                        channel.awaitTermination(2, TimeUnit.SECONDS);
+                        if (!channel.awaitTermination(2, TimeUnit.SECONDS)) {
+                            channel.shutdown();
+                        }
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
                     if (!didAnswer[0]) {
-                        System.out.println("[" + getName() + "] " +"Removed robot " + otherRobot.getId() + " because it was unreachable");
-                        System.out.println("In removing...");
+                        LOG.warning("[" + getName() + "] " +"Robot " + otherRobot.getId() + " is unreachable. In removing...");
                         RESTMethods.deleteRequest(otherRobot.getId());
-                        CleaningRobotDetails.getInstance().removeRobot(otherRobot.getId());
+                        CleaningRobotModel.getInstance().removeRobot(otherRobot.getId());
+                        System.out.println("Robot " + otherRobot.getId() + " Removed from topology");
                         didAnswer[0] = false;
                     }
                 });
@@ -95,9 +98,9 @@ public class HeartbeatManager extends Thread{
     }
 
     public void stopMeGently() {
-        synchronized (CleaningRobotDetails.getInstance().getSizeListLock()) {
+        synchronized (CleaningRobotModel.getInstance().getSizeListLock()) {
             stopCondition = true;
-            CleaningRobotDetails.getInstance().getSizeListLock().notify();
+            CleaningRobotModel.getInstance().getSizeListLock().notify();
         }
     }
 }

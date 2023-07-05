@@ -1,29 +1,35 @@
 package robot.beans;
 
 import common.CleaningRobotData;
-import server.beans.Statistic;
+import common.Statistic;
+import robot.CleaningRobot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CleaningRobotDetails {
+public class CleaningRobotModel {
 
-    private List<CleaningRobotData> robots = new ArrayList<>();
-    private List<Statistic> averages = new ArrayList<>();
+    private final List<CleaningRobotData> robots = new ArrayList<>();
+    private final List<Statistic> averages = new ArrayList<>();
     private CleaningRobotData robotInfo;
     private boolean isInMaintenance;
     private volatile boolean waitingForMaintenance;
     private long timestamp;
     private final Object sizeListLock = new Object();
     private final Object lock = new Object();
+    private final Object waitingForMaintenanceLock = new Object();
+    private final Object isInMaintenanceLock = new Object();
 
     public boolean isWaitingForMaintenance() {
-        return waitingForMaintenance;
+        synchronized (waitingForMaintenanceLock) {
+            return waitingForMaintenance;
+        }
     }
 
     public synchronized void setWaitingForMaintenance(boolean waitingForMaintenance) {
-        this.timestamp = System.currentTimeMillis();
-        this.waitingForMaintenance = waitingForMaintenance;
+        synchronized (waitingForMaintenanceLock) {
+            this.waitingForMaintenance = waitingForMaintenance;
+        }
     }
 
     public long getTimestamp() {
@@ -33,17 +39,23 @@ public class CleaningRobotDetails {
     public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
-    private static CleaningRobotDetails instance = null;
+    private static CleaningRobotModel instance = null;
 
-    public static synchronized CleaningRobotDetails getInstance() {
+    public static synchronized CleaningRobotModel getInstance() {
         if (instance == null)
-            instance = new CleaningRobotDetails();
+            instance = new CleaningRobotModel();
         return instance;
     }
 
     public void addRobot(CleaningRobotData robot) {
         synchronized (this.robots) {
             this.robots.add(robot);
+        }
+    }
+
+    public void addRobotList(List<CleaningRobotData> robotList) {
+        synchronized (this.robots) {
+            robots.addAll(robotList);
         }
     }
 
@@ -62,20 +74,23 @@ public class CleaningRobotDetails {
             averages.clear();
         }
     }
-    public void setAverages(List<Statistic> averages) {
-        this.averages = averages;
-    }
 
     public synchronized boolean isInMaintenance() {
+        synchronized (isInMaintenanceLock) {
             return isInMaintenance;
+        }
     }
 
     public synchronized void setInMaintenance(boolean isInMaintenance) {
-        this.isInMaintenance = isInMaintenance;
+        synchronized (isInMaintenanceLock) {
+            this.isInMaintenance = isInMaintenance;
+        }
     }
 
     public List<CleaningRobotData> getRobots() {
-        return robots;
+        synchronized (this.robots) {
+            return robots;
+        }
     }
 
     public CleaningRobotData getRobotInfo() {
@@ -86,15 +101,12 @@ public class CleaningRobotDetails {
         this.robotInfo = robotInfo;
     }
 
-    public void setRobots(List<CleaningRobotData> robots) {
-        this.robots = robots;
-    }
-
     public void addStatistic(Statistic stat) {
         synchronized (this.averages) {
             this.averages.add(stat);
         }
     }
+
     public boolean checkTimestamp(long timestamp) {
         return this.timestamp < timestamp;
     }

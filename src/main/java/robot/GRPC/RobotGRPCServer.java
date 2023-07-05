@@ -2,7 +2,7 @@ package robot.GRPC;
 
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -15,7 +15,7 @@ public class RobotGRPCServer{
     // TODO gestire chiusura server gRPC
     public static void startGRPCServer() throws IOException {
         //Starting the GRPC server for
-            server = ServerBuilder.forPort(CleaningRobotDetails.getInstance().getRobotInfo().getPort()).addService(new RobotServiceImpl()).build();
+            server = ServerBuilder.forPort(CleaningRobotModel.getInstance().getRobotInfo().getPort()).addService(new RobotServiceImpl()).build();
             server.start();
             System.out.println("> GRPC Server started!");
 
@@ -28,6 +28,7 @@ public class RobotGRPCServer{
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        System.out.println("---------------- ROBOT GRPC SERVER CLOSED ---------------");
         server.shutdownNow();
     }
 }

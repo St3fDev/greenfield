@@ -5,7 +5,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
-import robot.beans.CleaningRobotDetails;
+import robot.beans.CleaningRobotModel;
 
 public class RESTMethods {
 
@@ -15,7 +15,7 @@ public class RESTMethods {
     public static ClientResponse postRequest(Client client) {
         String postPath = SERVER_ADDRESS + "/robots/addRobot";
         WebResource webResource = client.resource(postPath);
-        String input = new Gson().toJson(CleaningRobotDetails.getInstance().getRobotInfo());
+        String input = new Gson().toJson(CleaningRobotModel.getInstance().getRobotInfo());
         //System.out.println(input);
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);

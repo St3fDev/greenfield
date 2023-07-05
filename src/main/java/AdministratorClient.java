@@ -5,6 +5,7 @@ import common.RESTMethods;
 import common.RobotListResponse;
 import robot.Threads.IOManager;
 
+import java.util.Objects;
 import java.util.Scanner;
 
 public class AdministratorClient {
@@ -45,7 +46,7 @@ public class AdministratorClient {
             }
         }
         ClientResponse clientResponse = RESTMethods.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
-        System.out.println(clientResponse.toString());
+        System.out.println(Objects.requireNonNull(clientResponse));
         if (clientResponse.getStatus() == 200) {
             String average = clientResponse.getEntity(String.class);
             System.out.println("The average of the last " + value + " air pollution levels measured by the robot [" + id + "] is: " + average);
