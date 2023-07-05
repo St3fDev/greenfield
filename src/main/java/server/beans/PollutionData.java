@@ -2,12 +2,9 @@ package server.beans;
 
 import common.Statistic;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 @XmlRootElement
-@XmlAccessorType(XmlAccessType.FIELD)
 public class PollutionData {
     private String robotId;
     private List<Statistic> pollutionAverages;

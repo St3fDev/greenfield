@@ -44,7 +44,7 @@ public class RobotPresentationManager extends Thread{
 
             @Override
             public void onError(Throwable t) {
-                System.out.println("Removed robot " + destinationRobot.getId() + " because it was unreachable");
+                System.out.println("Removed robot " + destinationRobot.getId() + " because it is unreachable");
                 RESTMethods.deleteRequest(destinationRobot.getId());
                 CleaningRobotModel.getInstance().getRobots().removeIf((elem) -> elem.getId().equals(destinationRobot.getId()));
                 channel.shutdown();

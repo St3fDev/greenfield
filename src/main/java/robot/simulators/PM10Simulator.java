@@ -33,7 +33,6 @@ public class PM10Simulator extends Simulator {
             i+=0.2;
 
         }
-        // TODO: Da rimuovere - Utilizzato solo per scopi di debug
         System.out.println("----------------- PM10 SIMULATOR CLOSED -----------------");
 
     }

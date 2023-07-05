@@ -17,8 +17,7 @@ import java.util.concurrent.TimeUnit;
 public class MalfunctionManager extends Thread {
     private static final int DELAY = 10000; // 10 seconds delay
     private static final double MALFUNCTION_PROBABILITY = 0.1; // 10% probability
-    private static final Object lock = new Object();
-    private Random random;
+    private final Random random;
     private volatile boolean stopCondition = false;
 
     public MalfunctionManager() {
@@ -27,6 +26,7 @@ public class MalfunctionManager extends Thread {
         this.random = new Random();
     }
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while (!stopCondition) {

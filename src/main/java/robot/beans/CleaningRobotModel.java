@@ -2,7 +2,6 @@ package robot.beans;
 
 import common.CleaningRobotData;
 import common.Statistic;
-import robot.CleaningRobot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +11,7 @@ public class CleaningRobotModel {
     private final List<CleaningRobotData> robots = new ArrayList<>();
     private final List<Statistic> averages = new ArrayList<>();
     private CleaningRobotData robotInfo;
-    private boolean isInMaintenance;
+    private volatile boolean isInMaintenance;
     private volatile boolean waitingForMaintenance;
     private long timestamp;
     private final Object sizeListLock = new Object();

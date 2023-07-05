@@ -5,8 +5,8 @@ import java.util.List;
 @XmlRootElement
 public class RobotListResponse {
 
-    public RobotListResponse(){}
     private List<CleaningRobotData> robots;
+    public RobotListResponse(){}
 
     public RobotListResponse(List<CleaningRobotData> robots) {
         this.robots = robots;

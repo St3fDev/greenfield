@@ -3,7 +3,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
 import common.RobotListResponse;
-import robot.Threads.IOManager;
+import robot.utils.IOManager;
 
 import java.util.Objects;
 import java.util.Scanner;
@@ -14,7 +14,7 @@ public class AdministratorClient {
 
     private static void getRobotList() {
         ClientResponse clientResponse = RESTMethods.showCurrentListCleaningRobot(CLIENT);
-        System.out.println(clientResponse.toString());
+        System.out.println(Objects.requireNonNull(clientResponse));
         if (clientResponse.getStatus() == 200) {
             RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
             System.out.println("Robot currently in the greenfield:");
@@ -27,24 +27,8 @@ public class AdministratorClient {
     }
 
     private static void getAverageFromRobot() {
-        Scanner in = new Scanner(System.in);
-        System.out.println("Type the robot id:");
-        System.out.print("> ");
-        String id = in.next();
-        int value = 0;
-        boolean validInput = false;
-
-        while (!validInput) {
-            System.out.println("Type the number of pollution levels:");
-            System.out.print("> ");
-            if (in.hasNextInt()) {
-                value = in.nextInt();
-                validInput = true;
-            } else {
-                System.out.println("Invalid input. Please enter a valid number.");
-                in.next(); // Consumes the invalid input
-            }
-        }
+        String id = IOManager.insertRobotId();
+        int value = IOManager.insertNumberOfMeasurement();
         ClientResponse clientResponse = RESTMethods.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
         System.out.println(Objects.requireNonNull(clientResponse));
         if (clientResponse.getStatus() == 200) {
@@ -56,15 +40,10 @@ public class AdministratorClient {
     }
 
     private static void getAverageFromT1ToT2() {
-        Scanner in = new Scanner(System.in);
-        System.out.println("Digit the first timestamp:");
-        System.out.print("> ");
-        Long t1 = Long.parseLong(in.next());
-        System.out.println("Digit the second timestamp:");
-        System.out.print("> ");
-        Long t2 = Long.parseLong(in.next());
+        long t1 = IOManager.insertTimestamp("Enter the first timestamp:");
+        long t2 = IOManager.insertTimestamp("Enter the second timestamp:");
         ClientResponse clientResponse = RESTMethods.getAverageAirPollutionLevelsFromTimestamp(CLIENT, t1, t2);
-        System.out.println(clientResponse.toString());
+        System.out.println(Objects.requireNonNull(clientResponse));
         if (clientResponse.getStatus() == 200) {
             String averageFromT1ToT2 = clientResponse.getEntity(String.class);
             System.out.println("The average of air pollution levels measured between " + t1 + " and " + t2 + " is: " + averageFromT1ToT2);
@@ -84,6 +63,7 @@ public class AdministratorClient {
             String option = in.next();
             switch (option) {
                 case "0":
+                    System.out.println("See you soon!");
                     break label;
                 case "1":
                     getRobotList();

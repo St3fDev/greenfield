@@ -8,6 +8,8 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import robot.beans.CleaningRobotModel;
 import server.beans.PollutionData;
 
+import java.util.logging.Logger;
+
 public class RobotMqttPublisher extends Thread {
 
     private static final String BROKER = "tcp://localhost:1883";
@@ -16,11 +18,13 @@ public class RobotMqttPublisher extends Thread {
     private static final String ID = MqttClient.generateClientId();
     private static final int SLEEP_TIME = 15 * 1_000;
     private volatile boolean stopCondition = false;
+    private static final Logger LOG = Logger.getLogger(RobotMqttPublisher.class.getName());
 
     public RobotMqttPublisher() {
         topic = "greenfield/pollution/district" + CleaningRobotModel.getInstance().getRobotInfo().getDistrict();
     }
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while (!stopCondition) {
@@ -29,8 +33,8 @@ public class RobotMqttPublisher extends Thread {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-            synchronized (CleaningRobotModel.getInstance().getLock()) {
                 while (CleaningRobotModel.getInstance().isWaitingForMaintenance()) {
+                    synchronized (CleaningRobotModel.getInstance().getLock()) {
                     try {
                         CleaningRobotModel.getInstance().getLock().wait();
                     } catch (InterruptedException e) {
@@ -40,7 +44,7 @@ public class RobotMqttPublisher extends Thread {
             }
 
             //TODO: per dimostrazione all'esame (la coerenza delle medie prodotte)
-            //System.out.println(CleaningRobotDetails.getInstance().getAverages().stream().map(Statistic::getAverage).reduce(0.0,Double::sum) / CleaningRobotDetails.getInstance().getAverages().size());
+            //System.out.println(CleaningRobotModel.getInstance().getAverages().stream().map(Statistic::getAverage).reduce(0.0,Double::sum) / CleaningRobotModel.getInstance().getAverages().size());
             PollutionData data = new PollutionData(CleaningRobotModel.getInstance().getRobotInfo().getId(), CleaningRobotModel.getInstance().getAverages(), System.currentTimeMillis());
             String payload = new Gson().toJson(data);
             try {
@@ -67,7 +71,7 @@ public class RobotMqttPublisher extends Thread {
                 if (clientMqtt.isConnected()) clientMqtt.disconnect();
                 System.out.printf("Sensor %s disconnected\n", ID);
             } catch (MqttException mqttException) {
-                System.err.printf("An error occurred: %s\n", mqttException);
+                LOG.warning(String.format("An error occurred: %s\n", mqttException));
             }
 
         }

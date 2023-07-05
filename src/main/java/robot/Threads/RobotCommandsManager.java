@@ -19,15 +19,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class RobotCommandsManager extends Thread {
-    private static final String SERVER_ADDRESS = "http://localhost:1337";
-    MalfunctionManager mt;
-    private static Logger log = Logger.getLogger(RobotCommandsManager.class.getName());
+    private static final Logger LOG = Logger.getLogger(RobotCommandsManager.class.getName());
 
     List<Thread> threadsToStop;
 
     public RobotCommandsManager(List<Thread> threadsToStop) {
         this.threadsToStop = threadsToStop;
-        mt = new MalfunctionManager();
         setName("RobotCommandsManager");
     }
 
@@ -62,7 +59,7 @@ public class RobotCommandsManager extends Thread {
             input = scanner.nextLine();
         }
 
-        log.info("Start robot removal process");
+        LOG.info("Start robot removal process");
         List<CleaningRobotData> snapshotRobot = CleaningRobotModel.getInstance().getRobots();
         if (snapshotRobot.size() > 0) {
             RobotServiceOuterClass.RobotExitRequest exitRequest = RobotServiceOuterClass.RobotExitRequest.newBuilder().setId(CleaningRobotModel.getInstance().getRobotInfo().getId()).build();
@@ -138,6 +135,6 @@ public class RobotCommandsManager extends Thread {
         }
         RobotGRPCServer.stopMeGently();
         RESTMethods.deleteRequest(CleaningRobotModel.getInstance().getRobotInfo().getId());
-        log.info("EXIT COMPLETED!");
+        LOG.info("EXIT COMPLETED!");
     }
 }

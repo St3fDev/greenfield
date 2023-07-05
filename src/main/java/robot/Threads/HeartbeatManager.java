@@ -22,6 +22,7 @@ public class HeartbeatManager extends Thread{
         setName("HeartbeatManager");
     }
 
+    @SuppressWarnings("BusyWait")
     @Override
     public void run() {
         while(!stopCondition) {

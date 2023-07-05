@@ -7,9 +7,12 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import robot.beans.CleaningRobotModel;
 
+import java.util.logging.Logger;
+
 public class RESTMethods {
 
     private static final String SERVER_ADDRESS = "http://localhost:1337";
+    private static final Logger LOG = Logger.getLogger(RESTMethods.class.getName());
 
     //-------------------------------------- ROBOT METHOD -----------------------------------------------
     public static ClientResponse postRequest(Client client) {
@@ -20,7 +23,7 @@ public class RESTMethods {
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not reachable");
+            LOG.warning("Server not reachable");
             return null;
         }
     }
@@ -32,7 +35,7 @@ public class RESTMethods {
         try {
             webResource.type("application/json").delete(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not reachable");
+            LOG.warning("Server not reachable");
         }
     }
 
@@ -42,7 +45,7 @@ public class RESTMethods {
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not reachable");
+            LOG.warning("Server not reachable");
             return null;
         }
     }
@@ -52,7 +55,7 @@ public class RESTMethods {
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not reachable");
+            LOG.warning("Server not reachable");
             return null;
         }
     }
@@ -60,9 +63,9 @@ public class RESTMethods {
     public static ClientResponse getAverageAirPollutionLevelsFromTimestamp(Client client, Long t1, Long t2) {
         WebResource webResource = client.resource(SERVER_ADDRESS + "/adminClient/average_pollution_level/"+ t1 + "/" + t2);
         try {
-            return webResource.type("application&/json").get(ClientResponse.class);
+            return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
-            System.out.println("Server not reachable");
+            LOG.warning("Server not reachable");
             return null;
         }
     }

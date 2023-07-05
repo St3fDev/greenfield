@@ -6,12 +6,13 @@ import org.eclipse.paho.client.mqttv3.*;
 import server.beans.GreenfieldModel;
 import server.beans.PollutionData;
 
-import java.sql.Timestamp;
 import java.util.Scanner;
+import java.util.logging.Logger;
 
 public class ServerMqttSubscriber {
 
-    static HttpServer server;
+    private static final Logger LOG = Logger.getLogger(ServerMqttSubscriber.class.getName());
+    private final HttpServer server;
 
     public ServerMqttSubscriber(HttpServer server) {
         this.server = server;
@@ -28,19 +29,18 @@ public class ServerMqttSubscriber {
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
 
-            System.out.printf("(%s) connection to the broker %s...\n", ServerMqttSubscriber.BROKER_ADDRESS, ServerMqttSubscriber.ID);
+            LOG.info(String.format("(%s) connection to the broker %s...\n", ServerMqttSubscriber.BROKER_ADDRESS, ServerMqttSubscriber.ID));
             client.connect(connOpts);
-            System.out.printf("(%s) connected\n", ServerMqttSubscriber.ID);
+            LOG.info(String.format("(%s) connected\n", ServerMqttSubscriber.ID));
 
             client.setCallback(new MqttCallback() {
                 @Override
                 public void connectionLost(Throwable cause) {
-                    System.out.printf("(%s) connection lost. Caused by: %s\n", ServerMqttSubscriber.ID, cause.getMessage());
+                    LOG.warning(String.format("(%s) connection lost. Caused by: %s\n", ServerMqttSubscriber.ID, cause.getMessage()));
                 }
 
                 @Override
-                public void messageArrived(String topic, MqttMessage message) throws Exception {
-                    String time = new Timestamp(System.currentTimeMillis()).toString();
+                public void messageArrived(String topic, MqttMessage message) {
                     String receivedMessage = new String(message.getPayload());
                     PollutionData averages = new Gson().fromJson(receivedMessage, PollutionData.class);
                     GreenfieldModel.getInstance().addRobotStatistic(averages);
@@ -60,16 +60,16 @@ public class ServerMqttSubscriber {
             System.out.println("Press a button to stop...");
             Scanner scanner = new Scanner(System.in);
             scanner.nextLine();
-            System.out.println("Stopping Administrator server");
+            LOG.info("Stopping Administrator server");
             server.stop(0);
-            System.out.println("Administrator server stopped");
+            LOG.info("Administrator server stopped");
             client.disconnect();
         } catch (MqttException me) {
-            System.out.println("reason " + me.getReasonCode());
-            System.out.println("msg " + me.getMessage());
-            System.out.println("loc " + me.getLocalizedMessage());
-            System.out.println("cause " + me.getCause());
-            System.out.println("excep " + me);
+            LOG.warning("reason " + me.getReasonCode());
+            LOG.warning("msg " + me.getMessage());
+            LOG.warning("loc " + me.getLocalizedMessage());
+            LOG.warning("cause " + me.getCause());
+            LOG.warning("excep " + me);
             me.printStackTrace();
         }
     }

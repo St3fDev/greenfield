@@ -7,14 +7,16 @@ import common.RESTMethods;
 import robot.GRPC.RobotGRPCServer;
 import robot.MQTT.RobotMqttPublisher;
 import robot.Threads.*;
-import robot.beans.BufferImpl;
 import robot.beans.CleaningRobotModel;
+import robot.simulators.BufferImpl;
 import robot.simulators.PM10Simulator;
+import robot.utils.IOManager;
 import server.beans.GreenfieldDetails;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 public class CleaningRobot {
@@ -34,7 +36,7 @@ public class CleaningRobot {
         clientResponse = RESTMethods.postRequest(client);
         //System.out.println(clientResponse.toString());
 
-        if (clientResponse.getStatus() == 200) {
+        if (Objects.requireNonNull(clientResponse).getStatus() == 200) {
             GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
             cleaningRobot.setPosition(details.getPosition());
             if (details.getRobots() != null)
@@ -62,11 +64,11 @@ public class CleaningRobot {
                 }
                 log.info("PRESENTATION ENDED");
             }
-            /*MalfunctionManager robotProblems = new MalfunctionManager();
+            MalfunctionManager robotProblems = new MalfunctionManager();
             robotProblems.start();
-            threadsToStop.add(robotProblems);*/
+            threadsToStop.add(robotProblems);
 
-            /*BufferImpl buffer = new BufferImpl();
+            BufferImpl buffer = new BufferImpl();
             PM10Simulator simulator = new PM10Simulator(buffer);
             PM10Consumer consumer = new PM10Consumer(buffer);
             simulator.start();
@@ -76,7 +78,7 @@ public class CleaningRobot {
 
             RobotMqttPublisher sensorPublisher = new RobotMqttPublisher();
             sensorPublisher.start();
-            threadsToStop.add(sensorPublisher);*/
+            threadsToStop.add(sensorPublisher);
 
             HeartbeatManager hbRobot = new HeartbeatManager();
             hbRobot.start();

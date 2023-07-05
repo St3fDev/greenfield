@@ -1,9 +1,9 @@
 package robot.Threads;
 
-import robot.beans.BufferImpl;
-import robot.beans.CleaningRobotModel;
-import robot.simulators.Measurement;
 import common.Statistic;
+import robot.beans.CleaningRobotModel;
+import robot.simulators.BufferImpl;
+import robot.simulators.Measurement;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class PM10Consumer extends Thread {
                 }
                 List<Measurement> measurementToProcess = buffer.readAllAndClean();
 
-                //TODO: per dimostrazione all'esame (per visualizzare se computa solo con 8 misure e se il thread si chiude)
+                //TODO: per dimostrazione all'esame (per visualizzare se computa solo con otto misure e se il thread si chiude)
                 //System.out.println(measurementToProcess.size());
 
                 CleaningRobotModel.getInstance().addStatistic(calculateAverage(measurementToProcess));

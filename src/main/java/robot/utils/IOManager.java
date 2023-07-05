@@ -1,16 +1,15 @@
-package robot.Threads;
+package robot.utils;
 
 import common.CleaningRobotData;
-import robot.utils.RobotPortChecker;
 
 import java.util.Scanner;
 
 public class IOManager {
 
+
     public static String setAddress() {
         String robotAddress;
         Scanner in = new Scanner(System.in);
-
         System.out.println("Type the address of the robot: ");
         System.out.print("> ");
         robotAddress = in.next();
@@ -18,28 +17,78 @@ public class IOManager {
     }
 
     public static int setPort(String robotAddress) {
-        Scanner in = new Scanner(System.in);
         boolean validPort = false;
         int robotPort = 0;
-
+        Scanner in = new Scanner(System.in);
         do {
             try {
-                System.out.println("Type the port of the robot: ");
+                System.out.println("Type the port of the robot (must be a positive integer): ");
                 System.out.print("> ");
-                robotPort = Integer.parseInt(in.next());
-                validPort = true;
+                robotPort = Integer.parseInt(in.nextLine());
 
-                if (RobotPortChecker.isPortOccupied(robotAddress, robotPort)) {
-                    System.out.println("The specified port is already occupied. Please choose another port.");
-                    validPort = false;
+                if (robotPort > 0) {
+                    validPort = true;
+
+                    if (RobotPortChecker.isPortOccupied(robotAddress, robotPort)) {
+                        System.out.println("The specified port is already occupied. Please choose another port.");
+                        validPort = false;
+                    }
+                } else {
+                    System.out.println("Invalid input. Please enter a positive integer for the port.");
                 }
             } catch (NumberFormatException e) {
                 System.out.println("Invalid input. Please enter a valid integer for the port.");
-                in.nextLine();
             }
         } while (!validPort);
 
         return robotPort;
+    }
+
+    public static String insertRobotId() {
+        Scanner in = new Scanner(System.in);
+        System.out.println("Type the robot id:");
+        System.out.print("> ");
+        return in.next();
+    }
+
+    public static int insertNumberOfMeasurement() {
+        Scanner in = new Scanner(System.in);
+        int value = 0;
+        boolean validInput = false;
+        while (!validInput) {
+            System.out.println("Enter the number of pollution levels:");
+            System.out.print("> ");
+            if (in.hasNextInt()) {
+                value = in.nextInt();
+                if (value > 0) {
+                    validInput = true;
+                } else {
+                    System.out.println("Invalid input. Please enter a positive number.");
+                }
+            } else {
+                System.out.println("Invalid input. Please enter a valid number.");
+                in.next(); // Consumes the invalid input
+            }
+        }
+        return value;
+    }
+
+    public static long insertTimestamp(String prompt) {
+        Scanner in = new Scanner(System.in);
+        long timestamp = 0;
+        boolean validTimestamp = false;
+        while (!validTimestamp) {
+            System.out.println(prompt);
+            System.out.print("> ");
+            String input = in.next();
+            try {
+                timestamp = Long.parseLong(input);
+                validTimestamp = true;
+            } catch (NumberFormatException e) {
+                System.out.println("Invalid input. Please enter a valid long for the timestamp:");
+            }
+        }
+        return timestamp;
     }
 
     public static void printRobot(CleaningRobotData cleaningRobot) {
@@ -66,4 +115,5 @@ public class IOManager {
         System.out.println("|  [0]: quit this program                                                                                         |");
         System.out.println("-------------------------------------------------------------------------------------------------------------------");
     }
+
 }
