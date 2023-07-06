@@ -1,6 +1,7 @@
-package robot.utils;
+package common;
 
 import common.CleaningRobotData;
+import robot.utils.RobotPortChecker;
 
 import java.util.Scanner;
 
@@ -10,7 +11,7 @@ public class IOManager {
     public static String setAddress() {
         String robotAddress;
         Scanner in = new Scanner(System.in);
-        System.out.println("Type the address of the robot: ");
+        System.out.println("Digit the address of the cleaning robot: ");
         System.out.print("> ");
         robotAddress = in.next();
         return robotAddress;
@@ -22,7 +23,7 @@ public class IOManager {
         Scanner in = new Scanner(System.in);
         do {
             try {
-                System.out.println("Type the port of the robot (must be a positive integer): ");
+                System.out.println("Digit the port of the cleaning robot: ");
                 System.out.print("> ");
                 robotPort = Integer.parseInt(in.nextLine());
 
@@ -34,10 +35,10 @@ public class IOManager {
                         validPort = false;
                     }
                 } else {
-                    System.out.println("Invalid input. Please enter a positive integer for the port.");
+                    System.out.println("Invalid input. Please digit a positive integer for the port.");
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid integer for the port.");
+                System.out.println("Invalid input. Please digit a valid integer for the port.");
             }
         } while (!validPort);
 
@@ -46,7 +47,7 @@ public class IOManager {
 
     public static String insertRobotId() {
         Scanner in = new Scanner(System.in);
-        System.out.println("Type the robot id:");
+        System.out.println("Digit the cleaning robot id:");
         System.out.print("> ");
         return in.next();
     }
@@ -56,18 +57,18 @@ public class IOManager {
         int value = 0;
         boolean validInput = false;
         while (!validInput) {
-            System.out.println("Enter the number of pollution levels:");
+            System.out.println("Digit the number of pollution levels:");
             System.out.print("> ");
             if (in.hasNextInt()) {
                 value = in.nextInt();
                 if (value > 0) {
                     validInput = true;
                 } else {
-                    System.out.println("Invalid input. Please enter a positive number.");
+                    System.out.println("Invalid input. Please digit a positive number.");
                 }
             } else {
-                System.out.println("Invalid input. Please enter a valid number.");
-                in.next(); // Consumes the invalid input
+                System.out.println("Invalid input. Please digit a valid number.");
+                in.next();
             }
         }
         return value;
@@ -85,26 +86,19 @@ public class IOManager {
                 timestamp = Long.parseLong(input);
                 validTimestamp = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please enter a valid long for the timestamp:");
+                System.out.println("Invalid input. Please digit a valid long for the timestamp:");
             }
         }
         return timestamp;
     }
 
     public static void printRobot(CleaningRobotData cleaningRobot) {
-        System.out.println("----------------------------------------------------------------------");
-        System.out.println("|             " + cleaningRobot + "              |");
-        System.out.println("----------------------------------------------------------------------");
+        System.out.println("--------------------------------------------------------------------------");
+        System.out.println("|           " + cleaningRobot + "          |");
+        System.out.println("--------------------------------------------------------------------------");
     }
 
     public static void printOptions() {
-        System.out.println(" ________  ________  _______   _______   ________   ________ ___  _______   ___       ________");
-        System.out.println("|\\   ____\\|\\   __  \\|\\  ___ \\ |\\  ___ \\ |\\   ___  \\|\\  _____\\\\  \\|\\  ___ \\ |\\  \\     |\\   ___ \\");
-        System.out.println("\\ \\  \\  __\\ \\   _  _\\ \\  \\_|/_\\ \\  \\_|/_\\ \\  \\\\ \\  \\ \\   __\\\\ \\  \\ \\  \\_|/_\\ \\  \\    \\ \\  \\ \\\\ \\");
-        System.out.println(" \\ \\  \\|\\  \\ \\  \\\\  \\\\ \\  \\_|\\ \\ \\  \\_|\\ \\ \\  \\\\ \\  \\ \\  \\_| \\ \\  \\ \\  \\_|\\ \\ \\  \\____\\ \\  \\_\\\\ \\");
-        System.out.println("  \\ \\_______\\ \\__\\\\ _\\\\ \\_______\\ \\_______\\ \\__\\\\ \\__\\ \\__\\   \\ \\__\\ \\_______\\ \\_______\\ \\_______\\");
-        System.out.println("   \\|_______|\\|__|\\|__|\\|_______|\\|_______|\\|__| \\|__|\\|__|    \\|__|\\|_______|\\|_______|\\|_______|");
-        System.out.println();
         System.out.println("-------------------------------------------------------------------------------------------------------------------");
         System.out.println("|  Welcome in Greenfield!!                                                                                        |");
         System.out.println("|  Digit a number to get the following information:                                                               |");
@@ -114,6 +108,16 @@ public class IOManager {
         System.out.println("|  [4]: shows all available options                                                                               |");
         System.out.println("|  [0]: quit this program                                                                                         |");
         System.out.println("-------------------------------------------------------------------------------------------------------------------");
+    }
+
+    public static void printLogo() {
+        System.out.println(" ________  ________  _______   _______   ________   ________ ___  _______   ___       ________");
+        System.out.println("|\\   ____\\|\\   __  \\|\\  ___ \\ |\\  ___ \\ |\\   ___  \\|\\  _____\\\\  \\|\\  ___ \\ |\\  \\     |\\   ___ \\");
+        System.out.println("\\ \\  \\  __\\ \\   _  _\\ \\  \\_|/_\\ \\  \\_|/_\\ \\  \\\\ \\  \\ \\   __\\\\ \\  \\ \\  \\_|/_\\ \\  \\    \\ \\  \\ \\\\ \\");
+        System.out.println(" \\ \\  \\|\\  \\ \\  \\\\  \\\\ \\  \\_|\\ \\ \\  \\_|\\ \\ \\  \\\\ \\  \\ \\  \\_| \\ \\  \\ \\  \\_|\\ \\ \\  \\____\\ \\  \\_\\\\ \\");
+        System.out.println("  \\ \\_______\\ \\__\\\\ _\\\\ \\_______\\ \\_______\\ \\__\\\\ \\__\\ \\__\\   \\ \\__\\ \\_______\\ \\_______\\ \\_______\\");
+        System.out.println("   \\|_______|\\|__|\\|__|\\|_______|\\|_______|\\|__| \\|__|\\|__|    \\|__|\\|_______|\\|_______|\\|_______|");
+        System.out.println();
     }
 
 }

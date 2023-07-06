@@ -1,5 +1,6 @@
 package robot.Threads;
 
+import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
 import io.grpc.ManagedChannel;
@@ -77,10 +78,10 @@ public class HeartbeatManager extends Thread{
                         throw new RuntimeException(e);
                     }
                     if (!didAnswer[0]) {
-                        LOG.warning("[" + getName() + "] " +"Robot " + otherRobot.getId() + " is unreachable. In removing...");
-                        RESTMethods.deleteRequest(otherRobot.getId());
+                        LOG.warning("[" + getName() + "] " +"Cleaning robot " + otherRobot.getId() + " is unreachable. In removing...");
+                        ClientResponse response = RESTMethods.deleteRequest(otherRobot.getId());
                         CleaningRobotModel.getInstance().removeRobot(otherRobot.getId());
-                        System.out.println("Robot " + otherRobot.getId() + " Removed from topology");
+                        System.out.println("Cleaning robot " + otherRobot.getId() + " Removed from topology");
                         didAnswer[0] = false;
                     }
                 });

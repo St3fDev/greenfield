@@ -7,15 +7,15 @@ import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;
 
 @XmlRootElement
-public class GreenfieldDetails {
+public class GreenfieldData {
 
     private Position position;
     private List<CleaningRobotData> robots;
     private int district;
 
-    public GreenfieldDetails() {}
+    public GreenfieldData() {}
 
-    public GreenfieldDetails(Position position, List<CleaningRobotData> robots, int district) {
+    public GreenfieldData(Position position, List<CleaningRobotData> robots, int district) {
         this.position = position;
         this.robots = robots;
         this.district = district;

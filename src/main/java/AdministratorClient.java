@@ -3,7 +3,7 @@ import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
 import common.RobotListResponse;
-import robot.utils.IOManager;
+import common.IOManager;
 
 import java.util.Objects;
 import java.util.Scanner;
@@ -17,7 +17,7 @@ public class AdministratorClient {
         System.out.println(Objects.requireNonNull(clientResponse));
         if (clientResponse.getStatus() == 200) {
             RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
-            System.out.println("Robot currently in the greenfield:");
+            System.out.println("Cleaning robots currently available in greenfield:");
             for (CleaningRobotData c : robots.getRobots()) {
                 IOManager.printRobot(c);
             }
@@ -54,6 +54,7 @@ public class AdministratorClient {
 
     public static void main(String[] args) {
 
+        IOManager.printLogo();
         IOManager.printOptions();
 
         Scanner in = new Scanner(System.in);

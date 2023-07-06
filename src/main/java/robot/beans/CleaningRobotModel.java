@@ -25,7 +25,7 @@ public class CleaningRobotModel {
         }
     }
 
-    public synchronized void setWaitingForMaintenance(boolean waitingForMaintenance) {
+    public void setWaitingForMaintenance(boolean waitingForMaintenance) {
         synchronized (waitingForMaintenanceLock) {
             this.waitingForMaintenance = waitingForMaintenance;
         }
@@ -39,7 +39,6 @@ public class CleaningRobotModel {
         this.timestamp = timestamp;
     }
     private static CleaningRobotModel instance = null;
-
     public static synchronized CleaningRobotModel getInstance() {
         if (instance == null)
             instance = new CleaningRobotModel();
@@ -65,7 +64,9 @@ public class CleaningRobotModel {
     }
 
     public List<Statistic> getAverages() {
-        return averages;
+        synchronized (this.averages) {
+            return averages;
+        }
     }
 
     public void clearLastAvg() {
@@ -74,13 +75,13 @@ public class CleaningRobotModel {
         }
     }
 
-    public synchronized boolean isInMaintenance() {
+    public boolean isInMaintenance() {
         synchronized (isInMaintenanceLock) {
             return isInMaintenance;
         }
     }
 
-    public synchronized void setInMaintenance(boolean isInMaintenance) {
+    public void setInMaintenance(boolean isInMaintenance) {
         synchronized (isInMaintenanceLock) {
             this.isInMaintenance = isInMaintenance;
         }
@@ -110,9 +111,9 @@ public class CleaningRobotModel {
         return this.timestamp < timestamp;
     }
 
-    public Object getLock() {
-        return lock;
-    }
+        public Object getLock() {
+            return lock;
+        }
 
     public Object getSizeListLock() {
          return sizeListLock;

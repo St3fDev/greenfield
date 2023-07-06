@@ -1,7 +1,7 @@
 package services;
 
 import common.CleaningRobotData;
-import server.beans.GreenfieldDetails;
+import server.beans.GreenfieldData;
 import server.beans.GreenfieldModel;
 
 import javax.ws.rs.*;
@@ -20,10 +20,10 @@ public class RobotService {
         List<CleaningRobotData> robots = GreenfieldModel.getInstance().getRobots();
         if (GreenfieldModel.getInstance().addRobot(cleaningRobot)) {
             System.out.println("ID: " + cleaningRobot.getId() + " ADDRESS: " + cleaningRobot.getAddress() + " PORT: " + cleaningRobot.getPort());
-            GreenfieldDetails details = new GreenfieldDetails(cleaningRobot.getPosition(), robots, cleaningRobot.getDistrict());
+            GreenfieldData details = new GreenfieldData(cleaningRobot.getPosition(), robots, cleaningRobot.getDistrict());
             return Response.ok(details).build();
         }
-        return Response.status(Status.CONFLICT).entity("this robot already exists").build();
+        return Response.status(Status.CONFLICT).entity("this cleaning robot already exists").build();
     }
 
     @Path("removeRobot/{id}")
@@ -31,10 +31,10 @@ public class RobotService {
     @Consumes({"application/json", "application/xml"})
     public Response removeCleaningRobot(@PathParam("id") String id) {
         if(GreenfieldModel.getInstance().removeRobot(id)) {
-            System.out.println("ROBOT : " + id + " REMOVED");
-            return Response.ok().entity("The robot with id: " + id + " has been removed").build();
+            System.out.println("CLEANING ROBOT " + id + " REMOVED");
+            return Response.ok().entity("The cleaning robot [" + id + "] has been removed from server").build();
         }
-        return Response.status(Status.GONE).entity("This robot was already removed").build();
+        return Response.status(Status.GONE).entity("This cleaning robot ["+ id +"] was already removed").build();
     }
 }
 

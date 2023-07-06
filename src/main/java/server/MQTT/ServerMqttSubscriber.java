@@ -2,9 +2,9 @@ package server.MQTT;
 
 import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
+import common.PollutionData;
 import org.eclipse.paho.client.mqttv3.*;
 import server.beans.GreenfieldModel;
-import server.beans.PollutionData;
 
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -29,9 +29,9 @@ public class ServerMqttSubscriber {
             MqttConnectOptions connOpts = new MqttConnectOptions();
             connOpts.setCleanSession(true);
 
-            LOG.info(String.format("(%s) connection to the broker %s...\n", ServerMqttSubscriber.BROKER_ADDRESS, ServerMqttSubscriber.ID));
+            LOG.info(String.format("(%s) connection to the broker %s...", ServerMqttSubscriber.BROKER_ADDRESS, ServerMqttSubscriber.ID));
             client.connect(connOpts);
-            LOG.info(String.format("(%s) connected\n", ServerMqttSubscriber.ID));
+            LOG.info(String.format("(%s) connected", ServerMqttSubscriber.ID));
 
             client.setCallback(new MqttCallback() {
                 @Override
@@ -44,7 +44,7 @@ public class ServerMqttSubscriber {
                     String receivedMessage = new String(message.getPayload());
                     PollutionData averages = new Gson().fromJson(receivedMessage, PollutionData.class);
                     GreenfieldModel.getInstance().addRobotStatistic(averages);
-                    System.out.println("VALUE RECEIVED");
+                    System.out.println("VALUE RECEIVED FROM " + averages.getRobotId());
                 }
 
                 @Override
@@ -53,9 +53,9 @@ public class ServerMqttSubscriber {
                 }
             });
 
-            System.out.printf("(%s) subscribing to the topic...\n", ServerMqttSubscriber.ID);
+            LOG.info(String.format("(%s) subscribing to the topic...", ServerMqttSubscriber.ID));
             client.subscribe(ServerMqttSubscriber.TOPICS, ServerMqttSubscriber.QOSs);
-            System.out.printf("(%s) topic registration completed\n", ServerMqttSubscriber.ID);
+            LOG.info(String.format("(%s) topic registration completed", ServerMqttSubscriber.ID));
 
             System.out.println("Press a button to stop...");
             Scanner scanner = new Scanner(System.in);

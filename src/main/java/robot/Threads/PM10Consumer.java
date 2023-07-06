@@ -18,6 +18,7 @@ public class PM10Consumer extends Thread {
 
     @Override
     public void run() {
+        List<Measurement> measurementToProcess;
         while (!stopCondition) {
             synchronized (buffer) {
                 while (buffer.getMeasurements().size() < 8 && !stopCondition) {
@@ -27,13 +28,12 @@ public class PM10Consumer extends Thread {
                         e.printStackTrace();
                     }
                 }
-                List<Measurement> measurementToProcess = buffer.readAllAndClean();
+                measurementToProcess = buffer.readAllAndClean();
 
                 //TODO: per dimostrazione all'esame (per visualizzare se computa solo con otto misure e se il thread si chiude)
                 //System.out.println(measurementToProcess.size());
-
-                CleaningRobotModel.getInstance().addStatistic(calculateAverage(measurementToProcess));
             }
+            CleaningRobotModel.getInstance().addStatistic(calculateAverage(measurementToProcess));
         }
         System.out.println("----------------- PM10 CONSUMER CLOSED ------------------");
     }

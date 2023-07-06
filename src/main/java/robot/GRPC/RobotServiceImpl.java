@@ -33,19 +33,20 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
     @Override
     public void notifyExit(RobotServiceOuterClass.RobotExitRequest request, StreamObserver<RobotServiceOuterClass.RobotExitResponse> responseObserver) {
         String idRobotToRemove = request.getId();
+        System.out.println("Removing cleaning robot: " + idRobotToRemove + " from my topology...");
         CleaningRobotModel.getInstance().removeRobot(idRobotToRemove);
+        System.out.println("Cleaning Robot" + idRobotToRemove + " successfully removed");
         responseObserver.onNext(RobotServiceOuterClass.RobotExitResponse.newBuilder()
                         .setId(CleaningRobotModel.getInstance().getRobotInfo().getId())
                 .build());
         responseObserver.onCompleted();
-        System.out.println("Removing robot: " + request.getId() + " to my topology...");
     }
 
     /*
-    quando il robot manda l'ok:
+    il robot manda l'ok:
 	    quando non è interessato ad andare dal meccanico
 	    quando è interessato ma il suo timestamp è maggiore di quello dell'altro robot che ha fatto la richiesta
-    Quando non manda l'ok:
+    non manda l'ok:
 	    quando è già dal meccanico
 	    quando il suo timestamp è minore del timestamp dell'altro robot che ha fatto la richiesta
      */

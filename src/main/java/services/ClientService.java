@@ -23,7 +23,7 @@ public class ClientService {
             return Response.ok(robots).build();
         }
         return Response.status(Response.Status.NOT_FOUND)
-                .entity("There are no robot in Greenfield, please come back later.")
+                .entity("There are no cleaning robot in Greenfield, please come back later.")
                 .build();
     }
 
@@ -50,7 +50,7 @@ public class ClientService {
             return Response.ok(average).build();
         }
         else {
-            return Response.status(Response.Status.NOT_FOUND).entity("No statistics were made, come back later").build();
+            return Response.status(Response.Status.NOT_FOUND).entity("No statistics are available between these two times, come back later.").build();
         }
     }
 }

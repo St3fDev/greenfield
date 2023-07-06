@@ -1,19 +1,19 @@
 package robot.MQTT;
 
 import com.google.gson.Gson;
+import common.PollutionData;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 import robot.beans.CleaningRobotModel;
-import server.beans.PollutionData;
 
 import java.util.logging.Logger;
 
 public class RobotMqttPublisher extends Thread {
 
     private static final String BROKER = "tcp://localhost:1883";
-    private static String topic;
+    private final String topic;
     private static final int QOS = 2;
     private static final String ID = MqttClient.generateClientId();
     private static final int SLEEP_TIME = 15 * 1_000;
@@ -33,8 +33,8 @@ public class RobotMqttPublisher extends Thread {
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-                while (CleaningRobotModel.getInstance().isWaitingForMaintenance()) {
-                    synchronized (CleaningRobotModel.getInstance().getLock()) {
+            while (CleaningRobotModel.getInstance().isWaitingForMaintenance()) {
+                synchronized (CleaningRobotModel.getInstance().getLock()) {
                     try {
                         CleaningRobotModel.getInstance().getLock().wait();
                     } catch (InterruptedException e) {
@@ -53,7 +53,7 @@ public class RobotMqttPublisher extends Thread {
                 connOpts.setCleanSession(true);
 
                 // Connessione del client.
-                //System.out.printf("(%s)  connection to the broker %s...\n", ID, BROKER);
+                LOG.info(String.format("(%s)  connection to the broker %s...", ID, BROKER));
                 clientMqtt.connect(connOpts);
                 //System.out.printf("(%s) connected\n", ID);
 
@@ -69,7 +69,7 @@ public class RobotMqttPublisher extends Thread {
 
                 // Si effettua la disconnessione.
                 if (clientMqtt.isConnected()) clientMqtt.disconnect();
-                System.out.printf("Sensor %s disconnected\n", ID);
+                //System.out.printf("Sensor %s disconnected\n", ID);
             } catch (MqttException mqttException) {
                 LOG.warning(String.format("An error occurred: %s\n", mqttException));
             }

@@ -1,5 +1,6 @@
 package robot.Threads;
 
+import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
 import io.grpc.ManagedChannel;
@@ -14,6 +15,7 @@ import robot.simulators.PM10Simulator;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -30,8 +32,8 @@ public class RobotCommandsManager extends Thread {
 
     @Override
     public void run() {
-        System.out.println("Digit 'quit' to remove the robot from Greenfield");
-        System.out.println("Digit 'fix' to send robot to mechanic");
+        System.out.println("Digit 'quit' to remove the cleaning robot from Greenfield");
+        System.out.println("Digit 'fix' to send cleaning robot to the mechanic");
         Scanner scanner = new Scanner(System.in);
         String input = "";
         boolean firstIteration = true; // Flag per la prima iterazione
@@ -48,7 +50,7 @@ public class RobotCommandsManager extends Thread {
                     if (!CleaningRobotModel.getInstance().isWaitingForMaintenance()) {
                         MalfunctionManager.handleMalfunction(robotSnapshot);
                     } else {
-                        System.out.println("The robot is already requiring access from the mechanic or is already in maintenance");
+                        System.out.println("The cleaning robot is already requiring access from the mechanic or is already in maintenance");
                     }
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
@@ -59,7 +61,7 @@ public class RobotCommandsManager extends Thread {
             input = scanner.nextLine();
         }
 
-        LOG.info("Start robot removal process");
+        LOG.info("Start cleaning robot removal process");
         List<CleaningRobotData> snapshotRobot = CleaningRobotModel.getInstance().getRobots();
         if (snapshotRobot.size() > 0) {
             RobotServiceOuterClass.RobotExitRequest exitRequest = RobotServiceOuterClass.RobotExitRequest.newBuilder().setId(CleaningRobotModel.getInstance().getRobotInfo().getId()).build();
@@ -72,7 +74,7 @@ public class RobotCommandsManager extends Thread {
 
                         @Override
                         public void onNext(RobotServiceOuterClass.RobotExitResponse response) {
-                            System.out.println("successfully removed from list of the robot: " + response.getId());
+                            System.out.println("successfully removed from list of the cleaning robot: " + response.getId());
                         }
 
                         @Override
@@ -129,12 +131,13 @@ public class RobotCommandsManager extends Thread {
                 try {
                     thread.join();
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    LOG.warning("Interrupted while waiting for thread to finish: " + e.getMessage());
                 }
             }
         }
         RobotGRPCServer.stopMeGently();
-        RESTMethods.deleteRequest(CleaningRobotModel.getInstance().getRobotInfo().getId());
+        ClientResponse response = RESTMethods.deleteRequest(CleaningRobotModel.getInstance().getRobotInfo().getId());
+        LOG.info(Objects.requireNonNull(response).getEntity(String.class));
         LOG.info("EXIT COMPLETED!");
     }
 }

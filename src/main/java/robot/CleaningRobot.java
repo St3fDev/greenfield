@@ -10,8 +10,8 @@ import robot.Threads.*;
 import robot.beans.CleaningRobotModel;
 import robot.simulators.BufferImpl;
 import robot.simulators.PM10Simulator;
-import robot.utils.IOManager;
-import server.beans.GreenfieldDetails;
+import common.IOManager;
+import server.beans.GreenfieldData;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class CleaningRobot {
 
     private static final String ID = "id-" + (int) (1 + Math.random() * 1000);
     private static final List<Thread> threadsToStop = new ArrayList<>();
-    private static final Logger log = Logger.getLogger(CleaningRobot.class.getName());
+    private static final Logger LOG = Logger.getLogger(CleaningRobot.class.getName());
     public static void main(String[] args) throws IOException {
         Client client = Client.create();
         ClientResponse clientResponse;
@@ -34,10 +34,9 @@ public class CleaningRobot {
 
         CleaningRobotModel.getInstance().setRobotInfo(cleaningRobot);
         clientResponse = RESTMethods.postRequest(client);
-        //System.out.println(clientResponse.toString());
 
         if (Objects.requireNonNull(clientResponse).getStatus() == 200) {
-            GreenfieldDetails details = clientResponse.getEntity(GreenfieldDetails.class);
+            GreenfieldData details = clientResponse.getEntity(GreenfieldData.class);
             cleaningRobot.setPosition(details.getPosition());
             if (details.getRobots() != null)
                 CleaningRobotModel.getInstance().addRobotList(details.getRobots());
@@ -47,7 +46,7 @@ public class CleaningRobot {
             RobotGRPCServer.startGRPCServer();
 
             if (CleaningRobotModel.getInstance().getRobots().size() > 0) {
-                log.info("PRESENTATION STARTED");
+                LOG.info("PRESENTATION STARTED");
                 List<RobotPresentationManager> presentationThreads = new ArrayList<>();
                 for (CleaningRobotData robotToPresent : CleaningRobotModel.getInstance().getRobots()) {
                     RobotPresentationManager presentation = new RobotPresentationManager(cleaningRobot, robotToPresent);
@@ -59,10 +58,10 @@ public class CleaningRobot {
                     try {
                         thread.join();
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        LOG.warning("Interrupted while waiting for thread to finish: " + e.getMessage());
                     }
                 }
-                log.info("PRESENTATION ENDED");
+                LOG.info("PRESENTATION ENDED");
             }
             MalfunctionManager robotProblems = new MalfunctionManager();
             robotProblems.start();
@@ -87,7 +86,7 @@ public class CleaningRobot {
             RobotCommandsManager robotInput = new RobotCommandsManager(threadsToStop);
             robotInput.start();
         } else {
-            log.warning(clientResponse.getEntity(String.class));
+            LOG.warning(clientResponse.getEntity(String.class));
         }
     }
 }

@@ -28,14 +28,15 @@ public class RESTMethods {
         }
     }
 
-    public static void deleteRequest(String robotId) {
+    public static ClientResponse deleteRequest(String robotId) {
         Client client = Client.create();
         String url = SERVER_ADDRESS + "/robots/removeRobot/" + robotId;
         WebResource webResource = client.resource(url);
         try {
-            webResource.type("application/json").delete(ClientResponse.class);
+            return webResource.type("application/json").delete(ClientResponse.class);
         } catch (ClientHandlerException e) {
             LOG.warning("Server not reachable");
+            return null;
         }
     }
 

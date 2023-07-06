@@ -1,6 +1,7 @@
 package server.beans;
 
 import common.CleaningRobotData;
+import common.PollutionData;
 import common.Position;
 import common.Statistic;
 
@@ -57,23 +58,25 @@ public class GreenfieldModel {
 
     private Position generateRandomPosition(int index, CleaningRobotData cleaningRobot) {
         Random rand = new Random();
-        switch (index) {
-            case 0:
-                districts[0] += 1;
-                cleaningRobot.setDistrict(1);
-                return new Position(rand.nextInt(5), rand.nextInt(5));
-            case 1:
-                districts[1] += 1;
-                cleaningRobot.setDistrict(2);
-                return new Position(rand.nextInt(5), rand.nextInt(5)+5);
-            case 2:
-                districts[2] += 1;
-                cleaningRobot.setDistrict(3);
-                return new Position(rand.nextInt(5)+5, rand.nextInt(5)+5);
-            case 3:
-                districts[3] += 1;
-                cleaningRobot.setDistrict(4);
-                return new Position(rand.nextInt(5) + 5, rand.nextInt(5));
+        synchronized (districts) {
+            switch (index) {
+                case 0:
+                    districts[0] += 1;
+                    cleaningRobot.setDistrict(1);
+                    return new Position(rand.nextInt(5), rand.nextInt(5));
+                case 1:
+                    districts[1] += 1;
+                    cleaningRobot.setDistrict(2);
+                    return new Position(rand.nextInt(5), rand.nextInt(5) + 5);
+                case 2:
+                    districts[2] += 1;
+                    cleaningRobot.setDistrict(3);
+                    return new Position(rand.nextInt(5) + 5, rand.nextInt(5) + 5);
+                case 3:
+                    districts[3] += 1;
+                    cleaningRobot.setDistrict(4);
+                    return new Position(rand.nextInt(5) + 5, rand.nextInt(5));
+            }
         }
         return null;
     }

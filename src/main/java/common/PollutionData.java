@@ -1,6 +1,4 @@
-package server.beans;
-
-import common.Statistic;
+package common;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.List;

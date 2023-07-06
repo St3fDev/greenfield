@@ -39,12 +39,12 @@ public class RobotPresentationManager extends Thread{
         stub.presentation(request, new StreamObserver<RobotServiceOuterClass.RobotResponse>() {
             @Override
             public void onNext(RobotServiceOuterClass.RobotResponse robotResponse) {
-                System.out.println("Welcome from robot: " + robotResponse.getId());
+                System.out.println("Welcome from cleaning robot: " + robotResponse.getId());
             }
 
             @Override
             public void onError(Throwable t) {
-                System.out.println("Removed robot " + destinationRobot.getId() + " because it is unreachable");
+                System.out.println("Removed cleaning robot " + destinationRobot.getId() + " because it is unreachable");
                 RESTMethods.deleteRequest(destinationRobot.getId());
                 CleaningRobotModel.getInstance().getRobots().removeIf((elem) -> elem.getId().equals(destinationRobot.getId()));
                 channel.shutdown();

@@ -3,8 +3,11 @@ package robot.utils;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 public class RobotPortChecker {
+
+    private static final Logger LOG = Logger.getLogger(RobotPortChecker.class.getName());
     public static boolean isPortOccupied(String address, int port) {
         Socket socket = null;
         try {
@@ -21,7 +24,7 @@ public class RobotPortChecker {
                 try {
                     socket.close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOG.warning(("Error occurred while closing the socket: " + e.getMessage()));
                 }
             }
         }
