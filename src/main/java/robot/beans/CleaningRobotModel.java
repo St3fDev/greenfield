@@ -14,7 +14,7 @@ public class CleaningRobotModel {
     private volatile boolean isInMaintenance;
     private volatile boolean waitingForMaintenance;
     private long timestamp;
-    private final Object sizeListLock = new Object();
+    private final Object sizeListOfRobotLock = new Object();
     private final Object lock = new Object();
     private final Object waitingForMaintenanceLock = new Object();
     private final Object isInMaintenanceLock = new Object();
@@ -115,8 +115,8 @@ public class CleaningRobotModel {
             return lock;
         }
 
-    public Object getSizeListLock() {
-         return sizeListLock;
+    public Object getSizeListOfRobotLock() {
+         return sizeListOfRobotLock;
     }
 
 }

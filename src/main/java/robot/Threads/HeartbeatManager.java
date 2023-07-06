@@ -1,6 +1,5 @@
 package robot.Threads;
 
-import com.sun.jersey.api.client.ClientResponse;
 import common.CleaningRobotData;
 import common.RESTMethods;
 import io.grpc.ManagedChannel;
@@ -27,10 +26,10 @@ public class HeartbeatManager extends Thread{
     @Override
     public void run() {
         while(!stopCondition) {
-            synchronized (CleaningRobotModel.getInstance().getSizeListLock()) {
+            synchronized (CleaningRobotModel.getInstance().getSizeListOfRobotLock()) {
                 while(CleaningRobotModel.getInstance().getRobots().size() < 1 && !stopCondition) {
                     try {
-                        CleaningRobotModel.getInstance().getSizeListLock().wait();
+                        CleaningRobotModel.getInstance().getSizeListOfRobotLock().wait();
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }
@@ -79,7 +78,7 @@ public class HeartbeatManager extends Thread{
                     }
                     if (!didAnswer[0]) {
                         LOG.warning("[" + getName() + "] " +"Cleaning robot " + otherRobot.getId() + " is unreachable. In removing...");
-                        ClientResponse response = RESTMethods.deleteRequest(otherRobot.getId());
+                        RESTMethods.deleteRequest(otherRobot.getId());
                         CleaningRobotModel.getInstance().removeRobot(otherRobot.getId());
                         System.out.println("Cleaning robot " + otherRobot.getId() + " Removed from topology");
                         didAnswer[0] = false;
@@ -100,9 +99,9 @@ public class HeartbeatManager extends Thread{
     }
 
     public void stopMeGently() {
-        synchronized (CleaningRobotModel.getInstance().getSizeListLock()) {
+        synchronized (CleaningRobotModel.getInstance().getSizeListOfRobotLock()) {
             stopCondition = true;
-            CleaningRobotModel.getInstance().getSizeListLock().notify();
+            CleaningRobotModel.getInstance().getSizeListOfRobotLock().notify();
         }
     }
 }

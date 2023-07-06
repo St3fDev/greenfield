@@ -25,8 +25,8 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
         CleaningRobotData robotToInsert = new CleaningRobotData(request.getId(), request.getAddress(), request.getPort());
         robotToInsert.setPosition(new Position(request.getPosition().getX(), request.getPosition().getY()));
         CleaningRobotModel.getInstance().addRobot(robotToInsert);
-        synchronized (CleaningRobotModel.getInstance().getSizeListLock()) {
-            CleaningRobotModel.getInstance().getSizeListLock().notify();
+        synchronized (CleaningRobotModel.getInstance().getSizeListOfRobotLock()) {
+            CleaningRobotModel.getInstance().getSizeListOfRobotLock().notify();
         }
     }
 
