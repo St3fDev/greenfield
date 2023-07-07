@@ -14,8 +14,7 @@ public class AdministratorClient {
 
     private static void getRobotList() {
         ClientResponse clientResponse = RESTMethods.showCurrentListCleaningRobot(CLIENT);
-        System.out.println(Objects.requireNonNull(clientResponse));
-        if (clientResponse.getStatus() == 200) {
+        if (Objects.requireNonNull(clientResponse).getStatus() == 200) {
             RobotListResponse robots = clientResponse.getEntity(RobotListResponse.class);
             System.out.println("Cleaning robots currently available in greenfield:");
             for (CleaningRobotData c : robots.getRobots()) {
@@ -30,8 +29,7 @@ public class AdministratorClient {
         String id = IOManager.insertRobotId();
         int value = IOManager.insertNumberOfMeasurement();
         ClientResponse clientResponse = RESTMethods.getLastNAveragePollutionLevelOfRobot(CLIENT, id, value);
-        System.out.println(Objects.requireNonNull(clientResponse));
-        if (clientResponse.getStatus() == 200) {
+        if (Objects.requireNonNull(clientResponse).getStatus() == 200) {
             String average = clientResponse.getEntity(String.class);
             System.out.println("The average of the last " + value + " air pollution levels measured by the robot [" + id + "] is: " + average);
         } else {
@@ -43,8 +41,7 @@ public class AdministratorClient {
         long t1 = IOManager.insertTimestamp("Enter the first timestamp:");
         long t2 = IOManager.insertTimestamp("Enter the second timestamp:");
         ClientResponse clientResponse = RESTMethods.getAverageAirPollutionLevelsFromTimestamp(CLIENT, t1, t2);
-        System.out.println(Objects.requireNonNull(clientResponse));
-        if (clientResponse.getStatus() == 200) {
+        if (Objects.requireNonNull(clientResponse).getStatus() == 200) {
             String averageFromT1ToT2 = clientResponse.getEntity(String.class);
             System.out.println("The average of air pollution levels measured between " + t1 + " and " + t2 + " is: " + averageFromT1ToT2);
         } else {
@@ -82,6 +79,7 @@ public class AdministratorClient {
                     System.out.println("Option not supported");
                     break;
             }
+            System.out.println("-------------------------------------------------------------------------------------------------------------------");
         } while (true);
     }
 }

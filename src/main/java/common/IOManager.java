@@ -11,7 +11,7 @@ public class IOManager {
     public static String setAddress() {
         String robotAddress;
         Scanner in = new Scanner(System.in);
-        System.out.println("Digit the address of the cleaning robot: ");
+        System.out.println("Digit the address of the cleaning robot:");
         System.out.print("> ");
         robotAddress = in.next();
         return robotAddress;
@@ -23,7 +23,7 @@ public class IOManager {
         Scanner in = new Scanner(System.in);
         do {
             try {
-                System.out.println("Digit the port of the cleaning robot: ");
+                System.out.println("Digit the port of the cleaning robot:");
                 System.out.print("> ");
                 robotPort = Integer.parseInt(in.nextLine());
 
@@ -86,7 +86,7 @@ public class IOManager {
                 timestamp = Long.parseLong(input);
                 validTimestamp = true;
             } catch (NumberFormatException e) {
-                System.out.println("Invalid input. Please digit a valid long for the timestamp:");
+                System.out.println("Invalid input. Please digit a valid long for the timestamp.");
             }
         }
         return timestamp;
@@ -94,7 +94,7 @@ public class IOManager {
 
     public static void printRobot(CleaningRobotData cleaningRobot) {
         System.out.println("--------------------------------------------------------------------------");
-        System.out.println("|           " + cleaningRobot + "          |");
+        System.out.println("|           " + cleaningRobot + "           |");
         System.out.println("--------------------------------------------------------------------------");
     }
 

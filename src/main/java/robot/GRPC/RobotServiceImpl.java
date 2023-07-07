@@ -21,7 +21,7 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
                 .build();
         responseObserver.onNext(robotResponse);
         responseObserver.onCompleted();
-        System.out.println("> Adding robot " + request.getId() + " to my topology ...");
+        System.out.println("Adding robot " + request.getId() + " to my topology ...");
         CleaningRobotData robotToInsert = new CleaningRobotData(request.getId(), request.getAddress(), request.getPort());
         robotToInsert.setPosition(new Position(request.getPosition().getX(), request.getPosition().getY()));
         CleaningRobotModel.getInstance().addRobot(robotToInsert);
@@ -34,12 +34,12 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
     public void notifyExit(RobotServiceOuterClass.RobotExitRequest request, StreamObserver<RobotServiceOuterClass.RobotExitResponse> responseObserver) {
         String idRobotToRemove = request.getId();
         System.out.println("Removing cleaning robot: " + idRobotToRemove + " from my topology...");
-        CleaningRobotModel.getInstance().removeRobot(idRobotToRemove);
-        System.out.println("Cleaning Robot" + idRobotToRemove + " successfully removed");
         responseObserver.onNext(RobotServiceOuterClass.RobotExitResponse.newBuilder()
-                        .setId(CleaningRobotModel.getInstance().getRobotInfo().getId())
+                .setId(CleaningRobotModel.getInstance().getRobotInfo().getId())
                 .build());
         responseObserver.onCompleted();
+        CleaningRobotModel.getInstance().removeRobot(idRobotToRemove);
+        System.out.println("Cleaning Robot " + idRobotToRemove + " successfully removed");
     }
 
     /*
@@ -47,8 +47,8 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
 	    quando non è interessato ad andare dal meccanico
 	    quando è interessato ma il suo timestamp è maggiore di quello dell'altro robot che ha fatto la richiesta
     non manda l'ok:
+	    quando è interessato e il suo timestamp è minore del timestamp del robot che ha fatto la richiesta
 	    quando è già dal meccanico
-	    quando il suo timestamp è minore del timestamp dell'altro robot che ha fatto la richiesta
      */
     @Override
     public void accessToMechanic(RobotServiceOuterClass.MechanicAccessRequest request, StreamObserver<RobotServiceOuterClass.MechanicAccessResponse> responseObserver) {
@@ -63,11 +63,11 @@ public class RobotServiceImpl extends RobotServiceGrpc.RobotServiceImplBase {
                 }
             }
         }
-            RobotServiceOuterClass.MechanicAccessResponse response = RobotServiceOuterClass.MechanicAccessResponse.newBuilder()
-                    .setAck("OK from " + CleaningRobotModel.getInstance().getRobotInfo().getId())
-                    .build();
-            responseObserver.onNext(response);
-            responseObserver.onCompleted();
+        RobotServiceOuterClass.MechanicAccessResponse response = RobotServiceOuterClass.MechanicAccessResponse.newBuilder()
+                .setAck("OK from " + CleaningRobotModel.getInstance().getRobotInfo().getId())
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     @Override

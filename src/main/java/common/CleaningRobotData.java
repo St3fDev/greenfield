@@ -58,7 +58,7 @@ public class CleaningRobotData {
 
     @Override
     public String toString() {
-        return " CLEANING ROBOT: " + getId()
+        return "CLEANING ROBOT: " + getId()
                 + " POSITION: [" + getPosition().getX() + "," + getPosition().getY() + "]"
                 + " DISTRICT: " + getDistrict();
     }

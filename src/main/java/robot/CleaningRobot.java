@@ -11,7 +11,7 @@ import robot.beans.CleaningRobotModel;
 import robot.simulators.BufferImpl;
 import robot.simulators.PM10Simulator;
 import common.IOManager;
-import server.beans.GreenfieldData;
+import common.GreenfieldData;
 
 import java.io.IOException;
 import java.util.ArrayList;

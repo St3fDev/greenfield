@@ -16,10 +16,9 @@ public class RESTMethods {
 
     //-------------------------------------- ROBOT METHOD -----------------------------------------------
     public static ClientResponse postRequest(Client client) {
-        String postPath = SERVER_ADDRESS + "/robots/addRobot";
+        String postPath = SERVER_ADDRESS + "/robots/add_robot";
         WebResource webResource = client.resource(postPath);
         String input = new Gson().toJson(CleaningRobotModel.getInstance().getRobotInfo());
-        //System.out.println(input);
         try {
             return webResource.type("application/json").post(ClientResponse.class, input);
         } catch (ClientHandlerException e) {
@@ -30,7 +29,7 @@ public class RESTMethods {
 
     public static ClientResponse deleteRequest(String robotId) {
         Client client = Client.create();
-        String url = SERVER_ADDRESS + "/robots/removeRobot/" + robotId;
+        String url = SERVER_ADDRESS + "/robots/remove_robot/" + robotId;
         WebResource webResource = client.resource(url);
         try {
             return webResource.type("application/json").delete(ClientResponse.class);
@@ -42,7 +41,7 @@ public class RESTMethods {
 
     //------------------------------------- CLIENT METHOD ----------------------------------------------
     public static ClientResponse showCurrentListCleaningRobot(Client client) {
-        WebResource webResource = client.resource(SERVER_ADDRESS + "/adminClient/getRobots");
+        WebResource webResource = client.resource(SERVER_ADDRESS + "/admin_client/get_robots");
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
@@ -52,7 +51,7 @@ public class RESTMethods {
     }
 
     public static ClientResponse getLastNAveragePollutionLevelOfRobot(Client client, String id, int value) {
-        WebResource webResource = client.resource(SERVER_ADDRESS + "/adminClient/last_n_avg_pollution/"+ id + "/" + value);
+        WebResource webResource = client.resource(SERVER_ADDRESS + "/admin_client/last_n_avg_pollution/"+ id + "/" + value);
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {
@@ -62,7 +61,7 @@ public class RESTMethods {
     }
 
     public static ClientResponse getAverageAirPollutionLevelsFromTimestamp(Client client, Long t1, Long t2) {
-        WebResource webResource = client.resource(SERVER_ADDRESS + "/adminClient/average_pollution_level/"+ t1 + "/" + t2);
+        WebResource webResource = client.resource(SERVER_ADDRESS + "/admin_client/average_pollution_level/"+ t1 + "/" + t2);
         try {
             return webResource.type("application/json").get(ClientResponse.class);
         } catch (ClientHandlerException e) {

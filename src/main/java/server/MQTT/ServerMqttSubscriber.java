@@ -64,6 +64,7 @@ public class ServerMqttSubscriber {
             server.stop(0);
             LOG.info("Administrator server stopped");
             client.disconnect();
+            System.exit(0);
         } catch (MqttException me) {
             LOG.warning("reason " + me.getReasonCode());
             LOG.warning("msg " + me.getMessage());

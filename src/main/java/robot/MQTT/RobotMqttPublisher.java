@@ -42,7 +42,7 @@ public class RobotMqttPublisher extends Thread {
                     }
                 }
             }
-
+            System.out.println("TOPIC:" + topic);
             //TODO: per dimostrazione all'esame (la coerenza delle medie prodotte)
             //System.out.println(CleaningRobotModel.getInstance().getAverages().stream().map(Statistic::getAverage).reduce(0.0,Double::sum) / CleaningRobotModel.getInstance().getAverages().size());
             PollutionData data = new PollutionData(CleaningRobotModel.getInstance().getRobotInfo().getId(), CleaningRobotModel.getInstance().getAverages(), System.currentTimeMillis());

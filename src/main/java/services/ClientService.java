@@ -11,10 +11,10 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
 
-@Path("adminClient")
+@Path("admin_client")
 public class ClientService {
 
-    @Path("getRobots")
+    @Path("get_robots")
     @GET
     @Produces({"application/json", "application/xml"})
     public Response getAllRobots() {

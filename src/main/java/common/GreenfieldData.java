@@ -1,4 +1,4 @@
-package server.beans;
+package common;
 
 import common.CleaningRobotData;
 import common.Position;

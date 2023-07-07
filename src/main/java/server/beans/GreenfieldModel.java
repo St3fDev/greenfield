@@ -80,7 +80,8 @@ public class GreenfieldModel {
         }
         return null;
     }
-    // HANDLE ROBOTS:
+
+    // ---------------------------------- ROBOTS ---------------------------------------
     public boolean addRobot(CleaningRobotData cleaningRobot) {
         if (getIds().contains(cleaningRobot.getId()) || getFullHosts().contains(cleaningRobot.getAddress() + cleaningRobot.getPort())) {
             return false;
@@ -116,7 +117,7 @@ public class GreenfieldModel {
     }
 
 
-    // STATISTICS:
+    // ---------------------------------- STATISTICS ---------------------------------------
     public List<CleaningRobotData> getRobots() {
         List<CleaningRobotData> robotsTemp;
         synchronized (robots) {
